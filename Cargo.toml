@@ -1,4 +1,5 @@
 [workspace]
 members = [
-    "matrix_profile"
+    "matrix_profile",
+    "matrix-profile-wasm",
 ]

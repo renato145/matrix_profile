@@ -7,11 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rand = "0.8.3"
 ndarray = "0.14.0"
 num-traits = "0.2.14"
 ndarray-stats = "0.4.0"
 
 [dev-dependencies]
+rand = "0.8.3"
 rand_chacha = "0.3.0"
 approx = "0.4.0"

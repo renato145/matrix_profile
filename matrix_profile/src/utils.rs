@@ -1,7 +1,6 @@
-use std::cmp::Ordering;
-
 use ndarray::{prelude::*, Data, ScalarOperand};
 use num_traits::{Float, FromPrimitive};
+use std::cmp::Ordering;
 
 /// Normalizes an array sing mean and std.
 pub fn normalize<T>(x: Array1<T>) -> Array1<T>
