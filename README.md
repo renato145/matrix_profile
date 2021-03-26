@@ -1,4 +1,4 @@
-# Matrix Profile
+# Matrix Profile 
 
 Inspired by this [talk] here I implements the Matrix Profile algorithm STOMP used to analize time series.
 
