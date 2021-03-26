@@ -1,9 +1,10 @@
 //! Naive implementation to calculate the Matrix Profile.
 use crate::{
     matrix_profile::MatrixProfile,
-    utils::{euclidean_distance, normalize, ArgminSkipZero},
+    utils::{euclidean_distance, normalize},
 };
 use ndarray::prelude::*;
+use ndarray_stats::QuantileExt;
 use std::cmp::Ordering;
 
 pub struct NaiveMatrixProfile {
@@ -27,12 +28,16 @@ impl MatrixProfile for NaiveMatrixProfile {
     fn calculate(x: Vec<f32>, m: usize) -> Self {
         let x = Array1::from(x);
         let n = x.len() - m + 1;
+        // Nearby subsequences are likely highly similar so we define an "exclusion zone" around the diagonal
+        let exclusion_zone = (m as f32 / 4f32).ceil() as usize;
 
         let (profile, profile_idxs) = (0..n)
             .map(|i| {
                 let a = normalize(x.slice(s![i..(i + m)]).to_owned());
+                let exclusion_start = i - exclusion_zone.min(i);
+                let exclusion_end = (i + exclusion_zone).min(n);
                 (0..n)
-                    .filter(|&j| i != j)
+                    .filter(|&j| (j < exclusion_start) || (exclusion_end < j))
                     .map(|j| {
                         let b = normalize(x.slice(s![j..(j + m)]).to_owned());
                         let distance = euclidean_distance(&a, &b);
@@ -70,15 +75,20 @@ impl NaiveMatrixProfile {
     pub fn calculate_full_matrix(x: Vec<f32>, m: usize) -> Self {
         let x = Array1::from(x);
         let n = x.len() - m + 1;
+        // Nearby subsequences are likely highly similar so we define an "exclusion zone" around the diagonal
+        let exclusion_zone = (m as f32 / 4f32).ceil() as usize;
 
         let matrix = (0..n)
             .map(|i| {
                 let a = normalize(x.slice(s![i..(i + m)]).to_owned());
+                let exclusion_start = i - exclusion_zone.min(i);
+                let exclusion_end = (i + exclusion_zone).min(n);
                 (0..n)
                     .map(|j| {
-                        if i == j {
-                            return 0f32;
+                        if (exclusion_start <= j) && (j <= exclusion_end) {
+                            return std::f32::NAN;
                         }
+
                         let b = normalize(x.slice(s![j..(j + m)]).to_owned());
                         euclidean_distance(&a, &b)
                     })
@@ -104,13 +114,12 @@ impl NaiveMatrixProfile {
 
 fn profile_from_matrix(x: &Array2<f32>) -> (Vec<f32>, Vec<usize>) {
     let n = x.nrows();
-    println!("{}", n);
     let mut profile = Vec::with_capacity(n);
     let mut idxs = Vec::with_capacity(n);
 
     // for row in x.rows() { //ndarray 0.15
     for row in x.genrows() {
-        let i = row.argmin_skipzero();
+        let i = row.argmin_skipnan().unwrap();
         profile.push(row[i]);
         idxs.push(i);
     }
@@ -140,6 +149,25 @@ mod tests {
         let expected_idxs: Vec<usize> =
             vec![8, 9, 14, 5, 11, 3, 12, 9, 0, 7, 1, 14, 15, 16, 11, 12, 13];
         assert_relative_eq!(profile.as_slice(), expected_profile.as_slice());
+        assert_eq!(idxs.as_slice(), expected_idxs.as_slice());
+    }
+
+    #[test]
+    fn test_naive_large() {
+        let x = random_data(100, 34);
+        println!("x: {:?}", x);
+        let res = NaiveMatrixProfile::calculate_full_matrix(x.clone(), 10);
+        let idxs = res.get_profile_idxs();
+        let expected_idxs = vec![
+            71, 72, 26, 26, 27, 28, 29, 30, 30, 68, 72, 73, 74, 72, 73, 24, 25, 49, 3, 65, 82, 67,
+            47, 48, 15, 16, 3, 4, 5, 6, 7, 7, 54, 55, 76, 44, 45, 46, 47, 48, 53, 54, 55, 56, 57,
+            36, 37, 38, 39, 24, 60, 61, 62, 40, 41, 42, 43, 44, 85, 8, 68, 51, 52, 53, 54, 51, 20,
+            21, 60, 51, 11, 40, 1, 11, 12, 13, 34, 89, 90, 59, 53, 41, 42, 43, 44, 58, 32, 50, 51,
+            77, 85,
+        ];
+        assert_eq!(idxs.as_slice(), expected_idxs.as_slice());
+        let res = NaiveMatrixProfile::calculate(x, 10);
+        let idxs = res.get_profile_idxs();
         assert_eq!(idxs.as_slice(), expected_idxs.as_slice());
     }
 

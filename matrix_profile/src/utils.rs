@@ -30,7 +30,7 @@ where
 impl<A, S> ArgminSkipZero<A, S> for ArrayBase<S, Ix1>
 where
     S: Data<Elem = A>,
-    A: Float + Default
+    A: Float + Default,
 {
     fn argmin_skipzero(&self) -> usize {
         let (idx, _) = self
