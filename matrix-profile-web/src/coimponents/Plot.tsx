@@ -2,16 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import useMeasure from "react-use-measure";
 import { ResizeObserver } from "@juggle/resize-observer";
 import { TData, TStore, useStore } from "../store";
-import {
-  axisBottom,
-  axisLeft,
-  extent,
-  line,
-  max,
-  min,
-  scaleLinear,
-  select,
-} from "d3";
+import { axisBottom, axisLeft, line, max, min, scaleLinear, select } from "d3";
 
 const selector = (props: TStore) => props.data;
 
