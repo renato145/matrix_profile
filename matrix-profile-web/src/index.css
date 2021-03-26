@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-gray-900 antialiased font-custom text-lg;
+  }
+
+  a {
+    @apply text-blue-600 hover:text-blue-800 transition;
+  }
+
+  button {
+    @apply disabled:opacity-50;
+  }
+}
+
+@layer components {
+  .font-custom {
+    font-family: 'Oswald', sans-serif;
+    @apply text-red-900;
+  }
+
+  .btn {
+    @apply bg-gray-500 hover:bg-green-600 active:bg-green-800 px-2 py-1 rounded text-white transition focus:outline-none focus:ring;
+  }
+
+  .btn-confirm {
+    @apply bg-blue-500 hover:bg-blue-600 active:bg-blue-800 px-2 py-1 rounded text-white transition focus:outline-none focus:ring;
+  }
+
+  .btn-cancel {
+    @apply bg-red-500 hover:bg-red-600 active:bg-red-800 px-2 py-1 rounded text-white transition focus:outline-none focus:ring;
+  }
+
+  .btn-link {
+    @apply p-0 focus:shadow-none text-blue-600 hover:text-blue-800 transition focus:outline-none focus:ring;
+  }
+
+  .btn-sm {
+    @apply px-2 py-1 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-6 py-2 text-lg;
+  }
+}
