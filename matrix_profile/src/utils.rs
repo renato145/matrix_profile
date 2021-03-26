@@ -23,6 +23,7 @@ pub trait ArgminSkipZero<A, S>
 where
     S: Data<Elem = A>,
 {
+    /// Finds the index of the minimum value of the array skipping NaN values and zeroes.
     fn argmin_skipzero(&self) -> usize;
 }
 
