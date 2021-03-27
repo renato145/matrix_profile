@@ -20,7 +20,7 @@ const brushMargins = {
   top: 5,
 };
 
-const plotLimits = { minHeight: 100, maxHeight: 200 };
+const plotLimits = { minHeight: 100, maxHeight: 180 };
 const brushLimits = { minHeight: 50, maxHeight: 100 };
 
 export const Plot = () => {
@@ -52,25 +52,14 @@ export const Plot = () => {
       className="mt-4 flex flex-col flex-1"
     >
       {plotData !== undefined ? (
-        <div>
-          <LinePlot
-            y={plotData}
-            margins={margins}
-            height={dataHeight}
-            width={width}
-            limits={limits}
-            title="Time series data"
-          />
-          <Brush
-            y={plotData}
-            margins={brushMargins}
-            height={brushHeight}
-            width={width}
-            xScale={xScale}
-            limits={limits}
-            setLimits={setLimits}
-          />
-        </div>
+        <LinePlot
+          y={plotData}
+          margins={margins}
+          height={dataHeight}
+          width={width}
+          limits={limits}
+          title="Time series data"
+        />
       ) : (
         <div className="mt-5 text-center">
           <p>Upload some time series data or Load the sample data.</p>
@@ -87,7 +76,22 @@ export const Plot = () => {
             title="Matrix profile"
           />
         </div>
-      ) : plotData !== undefined ? (
+      ) : null}
+      {plotData !== undefined ? (
+        <div className="mt-2">
+          <Brush
+            y={plotData}
+            profile={profile}
+            margins={brushMargins}
+            height={brushHeight}
+            width={width}
+            xScale={xScale}
+            limits={limits}
+            setLimits={setLimits}
+          />
+        </div>
+      ) : null}
+      {(profile === undefined) && (plotData !== undefined) ? (
         <div className="mt-5 text-center">
           <p>Use the "Calculate" button to cumpute the matrix profile.</p>
         </div>

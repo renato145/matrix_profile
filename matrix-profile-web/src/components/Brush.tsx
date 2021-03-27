@@ -7,6 +7,7 @@ import { LinePlot } from "./LinePlot";
 
 interface Props {
   y: number[];
+  profile?: number[];
   width: number;
   height: number;
   margins: Margins;
@@ -19,6 +20,7 @@ interface Props {
 
 export const Brush: React.FC<Props> = ({
   y,
+  profile,
   height,
   width,
   margins,
@@ -27,12 +29,12 @@ export const Brush: React.FC<Props> = ({
   setLimits,
 }) => {
   const brushEnd = useCallback(
-    ({ selection }) => {
+    ({ selection, type }) => {
       if (selection === null) {
         setLimits(null);
-        return;
+      } else if (type !== "end") {
+        setLimits(selection.map(xScale.invert));
       }
-      setLimits(selection.map(xScale.invert));
     },
     [setLimits, xScale]
   );
@@ -47,23 +49,38 @@ export const Brush: React.FC<Props> = ({
     return brush;
   }, [margins, width, height, brushEnd]);
 
-  const ref = useRef<SVGGElement>(null);
+  const refTS = useRef<SVGGElement>(null);
+  const refMP = useRef<SVGGElement>(null);
 
   useEffect(() => {
-    if (brush === undefined || ref.current === null) return;
-    select(ref.current).call(brush);
+    if (brush === undefined || refTS.current === null) return;
+    select(refTS.current).call(brush);
+    if (refMP.current !== null) select(refMP.current).call(brush);
     // if (y.length > initialLimit) g.call(brush.move, [0, initialLimit].map(xScale));
-  }, [brush, xScale, y.length]);
+  }, [brush, xScale, y.length, profile]);
 
   return (
-    <LinePlot
-      y={y}
-      margins={margins}
-      height={height}
-      width={width}
-      limits={null}
-    >
-      <g ref={ref} />
-    </LinePlot>
+    <div>
+      <LinePlot
+        y={y}
+        margins={margins}
+        height={height}
+        width={width}
+        limits={null}
+      >
+        <g ref={refTS} />
+      </LinePlot>
+      {profile !== undefined ? (
+        <LinePlot
+          y={profile}
+          margins={margins}
+          height={height}
+          width={width}
+          limits={null}
+        >
+          <g ref={refMP} />
+        </LinePlot>
+      ) : null}
+    </div>
   );
 };
