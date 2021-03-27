@@ -1,13 +1,20 @@
 import React from "react";
-import { TStore, useStore } from "../store";
+import { DataState, TStore, useStore } from "../store";
 
-const selector = (props: TStore) => props.loadSampleData;
+const selector = ({ loadSampleData, dataState }: TStore) => ({
+  loadSampleData,
+  dataState,
+});
 
 export const LoadSampleBtn: React.FC = () => {
-  const loadSampleData = useStore(selector);
+  const { loadSampleData, dataState } = useStore(selector);
 
   return (
-    <button className="btn" onClick={loadSampleData}>
+    <button
+      className="btn"
+      onClick={loadSampleData}
+      disabled={dataState === DataState.SampleData}
+    >
       Load sample
     </button>
   );

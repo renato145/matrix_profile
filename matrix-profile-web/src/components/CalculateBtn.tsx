@@ -1,21 +1,36 @@
 import React from "react";
-import { DataState, TStore, useStore } from "../store";
+import { CalcState, DataState, TStore, useStore } from "../store";
+import { Spinner } from "./Spinner";
 
-const selector = ({ dataState, calculate }: TStore) => ({
+const selector = ({ dataState, calcState, calculate }: TStore) => ({
   dataState,
+  calcState,
   calculate,
 });
 
 export const CalculateBtn: React.FC = () => {
-  const { dataState, calculate } = useStore(selector);
+  const { dataState, calcState, calculate } = useStore(selector);
 
   return (
-    <button
-      className="btn"
-      onClick={calculate}
-      disabled={dataState === DataState.Empty}
-    >
-      Calculate
-    </button>
+    <div>
+      <button
+        className="btn"
+        onClick={async () => {
+          // const sleep = () => new Promise(() => calculate());
+          calculate();
+          // sleep();
+        }}
+        disabled={
+          dataState === DataState.Empty || calcState !== CalcState.Empty
+        }
+      >
+        <div className="flex items-baseline">
+          Calculate
+          {calcState === CalcState.Loading ? (
+            <Spinner className="ml-1" />
+          ) : null}
+        </div>
+      </button>
+    </div>
   );
 };

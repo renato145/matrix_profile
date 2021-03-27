@@ -1,7 +1,9 @@
-import React from "react";
+import { scaleLinear } from "d3";
+import React, { useMemo, useState } from "react";
 import useMeasure from "react-use-measure";
 import { TStore, useStore, yValue } from "../store";
 import { clamp } from "../utils";
+import { Brush } from "./Brush";
 import { LinePlot } from "./LinePlot";
 
 const selector = ({ data, profile }: TStore) => ({ data, profile });
@@ -13,30 +15,62 @@ const margins = {
   bottom: 25,
 };
 
-const minHeight = 100;
-const maxHeight = 200;
+const brushMargins = {
+  ...margins,
+  top: 5,
+};
+
+const plotLimits = { minHeight: 100, maxHeight: 200 };
+const brushLimits = { minHeight: 50, maxHeight: 100 };
 
 export const Plot = () => {
   const [ref, { height, width }] = useMeasure({ polyfill: ResizeObserver });
   const { data, profile } = useStore(selector);
-  const plotData = data?.map(yValue);
+  const [limits, setLimits] = useState<number[] | null>(null);
+
+  const plotData = useMemo(() => data?.map(yValue), [data]);
+
+  const xScale = useMemo(() => {
+    const domain = [0, plotData?.length ?? 100];
+    const range = [margins.left, width - margins.right];
+    const xScale = scaleLinear().domain(domain).range(range);
+    return xScale;
+  }, [plotData, width]);
+
   let dataHeight = profile === undefined ? height : height / 2;
-  dataHeight = clamp(dataHeight, minHeight, maxHeight);
+  dataHeight = clamp(dataHeight, plotLimits.minHeight, plotLimits.maxHeight);
+  const brushHeight = clamp(
+    height - dataHeight,
+    brushLimits.minHeight,
+    brushLimits.maxHeight
+  );
 
   return (
     <div
       ref={ref}
       style={{ minWidth: "300px" }}
-      className="mt-2 flex flex-col flex-1"
+      className="mt-4 flex flex-col flex-1"
     >
       {plotData !== undefined ? (
-        <LinePlot
-          y={plotData}
-          margins={margins}
-          height={dataHeight}
-          width={width}
-          title="Time series data"
-        />
+        <div>
+          <LinePlot
+            y={plotData}
+            margins={margins}
+            height={dataHeight}
+            width={width}
+            limits={limits}
+            title="Time series data"
+          />
+          <Brush
+            y={plotData}
+            margins={brushMargins}
+            height={brushHeight}
+            width={width}
+            xScale={xScale}
+            limits={limits}
+            setLimits={setLimits}
+          />
+        </div>
       ) : (
         <div className="mt-5 text-center">
           <p>Upload some time series data or Load the sample data.</p>
@@ -49,6 +83,7 @@ export const Plot = () => {
             margins={margins}
             height={dataHeight}
             width={width}
+            limits={limits}
             title="Matrix profile"
           />
         </div>
@@ -57,7 +92,6 @@ export const Plot = () => {
           <p>Use the "Calculate" button to cumpute the matrix profile.</p>
         </div>
       ) : null}
-
     </div>
   );
 };

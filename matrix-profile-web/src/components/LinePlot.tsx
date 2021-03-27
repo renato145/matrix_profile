@@ -1,12 +1,14 @@
 import { axisBottom, axisLeft, extent, line, scaleLinear, select } from "d3";
 import React, { useCallback, useMemo } from "react";
+import { Margins } from "../types";
 
 interface Props {
   y: number[];
-  margins: { left: number; right: number; top: number; bottom: number };
   height: number;
   width: number;
-  title: string;
+  margins: Margins;
+  limits: number[] | null;
+  title?: string;
 }
 
 export const LinePlot: React.FC<Props> = ({
@@ -14,37 +16,45 @@ export const LinePlot: React.FC<Props> = ({
   margins,
   height,
   width,
+  children,
+  limits,
   title,
 }) => {
   // const innerHeight = height - margins.top - margins.bottom;
   const innerWidth = width - margins.left - margins.right;
 
+  const { x, yShow } = useMemo(() => {
+    return limits === null
+      ? { x: [0, y.length], yShow: y }
+      : { x: [limits[0], limits[1]], yShow: y.slice(limits[0], limits[1]) };
+  }, [limits, y]);
+
   const { xAxis, xScale } = useMemo(() => {
-    const domain = [0, y.length];
+    const domain = x;
     const range = [margins.left, width - margins.right];
     const xScale = scaleLinear().domain(domain).range(range);
     const xAxis = axisBottom(xScale).tickSize(5).tickSizeOuter(0);
-    return { xScale, xAxis };
-  }, [margins, width, y]);
+    return { xAxis, xScale };
+  }, [margins.left, margins.right, width, x]);
 
   const { yAxis, yScale } = useMemo(() => {
     const domain = extent(y).map((o?: number) => o ?? 0);
     const range = [height - margins.bottom, margins.top];
     const yScale = scaleLinear().domain(domain).range(range).nice();
-    const yAxis = axisLeft(yScale).tickSize(-innerWidth);
+    const yAxis = axisLeft(yScale).tickSize(-innerWidth).ticks(4);
     return { yScale, yAxis };
   }, [y, height, margins, innerWidth]);
 
   const path = useMemo(() => {
-    if (y !== undefined) {
-      return line()(y.map((o, i) => [xScale(i), yScale(o)]));
+    if (yShow !== undefined) {
+      return line()(yShow.map((o, i) => [xScale(i+x[0]), yScale(o)]));
     }
     return null;
-  }, [y, xScale, yScale]);
+  }, [yShow, xScale, yScale, x]);
 
   const xAxisRef = useCallback(
     (node) => {
-      select(node).transition().call(xAxis);
+      select(node).call(xAxis);
     },
     [xAxis]
   );
@@ -59,12 +69,14 @@ export const LinePlot: React.FC<Props> = ({
   return (
     <div className="bg-indigo-50 rounded-sm">
       <svg height={height} width={width}>
-        <text
-          className="text-current text-2xl"
-          transform={`translate(${margins.left + 5}, ${margins.top - 10})`}
-        >
-          {title}
-        </text>
+        {title !== undefined ? (
+          <text
+            className="text-current text-2xl"
+            transform={`translate(${margins.left + 5}, ${margins.top - 10})`}
+          >
+            {title}
+          </text>
+        ) : null}
         <g
           ref={xAxisRef}
           transform={`translate(0,${height - margins.bottom})`}
@@ -73,10 +85,11 @@ export const LinePlot: React.FC<Props> = ({
         {path !== null ? (
           <path
             fill="none"
-            className="stroke-current text-blue-900 stroke-2 transition-all"
+            className="stroke-current text-blue-900 stroke-2 text-opacity-80"
             d={path}
           />
         ) : null}
+        {children}
       </svg>
     </div>
   );
