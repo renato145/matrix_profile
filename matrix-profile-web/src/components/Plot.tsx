@@ -1,84 +1,63 @@
-import React, { useCallback, useMemo } from "react";
+import React from "react";
 import useMeasure from "react-use-measure";
-import { ResizeObserver } from "@juggle/resize-observer";
-import { TData, TStore, useStore } from "../store";
-import { axisBottom, axisLeft, line, max, min, scaleLinear, select } from "d3";
+import { TStore, useStore, yValue } from "../store";
+import { clamp } from "../utils";
+import { LinePlot } from "./LinePlot";
 
-const selector = (props: TStore) => props.data;
+const selector = ({ data, profile }: TStore) => ({ data, profile });
 
 const margins = {
   left: 30,
   right: 20,
-  top: 20,
+  top: 38,
   bottom: 25,
 };
 
-const yValue = (o: TData[0]) => o.value;
+const minHeight = 100;
+const maxHeight = 200;
 
 export const Plot = () => {
   const [ref, { height, width }] = useMeasure({ polyfill: ResizeObserver });
-  const data = useStore(selector);
-  // const innerHeight = height - margins.top - margins.bottom;
-  const innerWidth = width - margins.left - margins.right;
-
-  const { xAxis, xScale } = useMemo(() => {
-    const domain = [0, data?.length ?? 100];
-    const range = [margins.left, width - margins.right];
-    const xScale = scaleLinear().domain(domain).range(range);
-    const xAxis = axisBottom(xScale).tickSize(5).tickSizeOuter(0);
-    return { xScale, xAxis };
-  }, [data, width]);
-
-  const { yAxis, yScale } = useMemo(() => {
-    const values = data?.map(yValue) ?? [0, 100];
-    const domain = [min(values) ?? 0, max(values) ?? 100];
-    const range = [height - margins.bottom, margins.top];
-    const yScale = scaleLinear().domain(domain).range(range).nice();
-    const yAxis = axisLeft(yScale).tickSize(-innerWidth);
-    return { yScale, yAxis };
-  }, [data, height, innerWidth]);
-
-  const path = useMemo(() => {
-    if (data !== undefined) {
-      return line()(data.map((o, i) => [xScale(i), yScale(o.value)]));
-    }
-    return null;
-  }, [data, xScale, yScale]);
-
-  const xAxisRef = useCallback(
-    (node) => {
-      select(node).transition().call(xAxis);
-    },
-    [xAxis]
-  );
-
-  const yAxisRef = useCallback(
-    (node) => {
-      select(node).transition().call(yAxis);
-    },
-    [yAxis]
-  );
+  const { data, profile } = useStore(selector);
+  const plotData = data?.map(yValue);
+  let dataHeight = profile === undefined ? height : height / 2;
+  dataHeight = clamp(dataHeight, minHeight, maxHeight);
 
   return (
     <div
       ref={ref}
-      style={{ minHeight: "100px", maxHeight: "300px", minWidth: "300px" }}
-      className="mt-2 bg-indigo-50 rounded-sm flex-1"
+      style={{ minWidth: "300px" }}
+      className="mt-2 flex flex-col flex-1"
     >
-      <svg height={height} width={width}>
-        <g
-          ref={xAxisRef}
-          transform={`translate(0,${height - margins.bottom})`}
+      {plotData !== undefined ? (
+        <LinePlot
+          y={plotData}
+          margins={margins}
+          height={dataHeight}
+          width={width}
+          title="Time series data"
         />
-        <g ref={yAxisRef} transform={`translate(${margins.left},0)`} />
-        {path !== null ? (
-          <path
-            fill="none"
-            className="stroke-current text-blue-900 stroke-2 transition-all"
-            d={path}
+      ) : (
+        <div className="mt-5 text-center">
+          <p>Upload some time series data or Load the sample data.</p>
+        </div>
+      )}
+      {profile !== undefined ? (
+        <div className="mt-2">
+          <LinePlot
+            y={profile}
+            margins={margins}
+            height={dataHeight}
+            width={width}
+            title="Matrix profile"
           />
-        ) : null}
-      </svg>
+        </div>
+      ) : plotData !== undefined ? (
+        <div className="mt-5 text-center">
+          <p>Use the "Calculate" button to cumpute the matrix profile.</p>
+        </div>
+      ) : null}
+
     </div>
   );
 };

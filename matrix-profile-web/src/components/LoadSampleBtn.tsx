@@ -7,11 +7,8 @@ export const LoadSampleBtn: React.FC = () => {
   const loadSampleData = useStore(selector);
 
   return (
-    <div className="flex items-baseline">
-      <button className="btn" onClick={loadSampleData}>
-        Load sample
-      </button>
-      <p className="text-sm">(info)</p>
-    </div>
+    <button className="btn" onClick={loadSampleData}>
+      Load sample
+    </button>
   );
 };

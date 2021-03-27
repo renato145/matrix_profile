@@ -2,6 +2,7 @@ import React from "react";
 import { LoadSampleBtn } from "./components/LoadSampleBtn";
 import { Plot } from "./components/Plot";
 import { DataDescription } from "./components/DataDescription";
+import { CalculateBtn } from "./components/CalculateBtn";
 
 export const App = () => {
   return (
@@ -11,10 +12,10 @@ export const App = () => {
         {/* <p>upload data button</p> */}
         {/* <p>info for uploading</p> */}
         <LoadSampleBtn />
-        <button className="btn">Calculate</button>
+        <CalculateBtn />
       </div>
-      <Plot />
       <DataDescription />
+      <Plot />
     </div>
   );
 };
