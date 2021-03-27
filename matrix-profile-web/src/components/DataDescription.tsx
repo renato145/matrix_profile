@@ -13,7 +13,7 @@ export const DataDescription: React.FC = () => {
 
   return dataState === DataState.SampleData ? (
     <div className="mt-2 text-base text-gray-700">
-      <p className="font-medium">
+      <p>
         Data:{" "}
         <a
           href="https://www.kaggle.com/sadeghjalalian/road-accident-in-uk"
@@ -23,7 +23,7 @@ export const DataDescription: React.FC = () => {
           Road Accident in UK
         </a>
       </p>
-      <p>
+      <p className="font-light">
         This data provides detailed road safety data about the circumstances of
         personal injury road accidents in GB from 2014 to 2017. The statistics
         relate only to personal injury accidents on public roads that are
