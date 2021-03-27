@@ -1,6 +1,7 @@
 import React from "react";
-import { LoadSampleBtn } from "./coimponents/LoadSampleBtn";
-import { Plot } from "./coimponents/Plot";
+import { LoadSampleBtn } from "./components/LoadSampleBtn";
+import { Plot } from "./components/Plot";
+import { DataDescription } from "./components/DataDescription";
 
 export const App = () => {
   return (
@@ -13,6 +14,7 @@ export const App = () => {
         <button className="btn">Calculate</button>
       </div>
       <Plot />
+      <DataDescription />
     </div>
   );
 };

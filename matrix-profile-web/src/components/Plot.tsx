@@ -47,14 +47,14 @@ export const Plot = () => {
 
   const xAxisRef = useCallback(
     (node) => {
-      select(node).call(xAxis);
+      select(node).transition().call(xAxis);
     },
     [xAxis]
   );
 
   const yAxisRef = useCallback(
     (node) => {
-      select(node).call(yAxis);
+      select(node).transition().call(yAxis);
     },
     [yAxis]
   );
@@ -63,7 +63,7 @@ export const Plot = () => {
     <div
       ref={ref}
       style={{ minHeight: "100px", maxHeight: "300px", minWidth: "300px" }}
-      className="mt-2 bg-indigo-100 rounded-sm flex-1"
+      className="mt-2 bg-indigo-50 rounded-sm flex-1"
     >
       <svg height={height} width={width}>
         <g
@@ -74,7 +74,7 @@ export const Plot = () => {
         {path !== null ? (
           <path
             fill="none"
-            className="stroke-current text-blue-700 stroke-2 transition-all"
+            className="stroke-current text-blue-900 stroke-2 transition-all"
             d={path}
           />
         ) : null}
