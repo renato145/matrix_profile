@@ -17,11 +17,11 @@ const margins = {
 
 const brushMargins = {
   ...margins,
-  top: 5,
+  top: 10,
 };
 
-const plotLimits = { minHeight: 100, maxHeight: 180 };
-const brushLimits = { minHeight: 50, maxHeight: 100 };
+const plotLimits = { minHeight: 100, maxHeight: 200 };
+const brushLimits = { minHeight: 50, maxHeight: 120 };
 
 export const Plot = () => {
   const [ref, { height, width }] = useMeasure({ polyfill: ResizeObserver });
@@ -59,6 +59,7 @@ export const Plot = () => {
           width={width}
           limits={limits}
           title="Time series data"
+          className="stroke-current text-blue-900 stroke-2 text-opacity-80"
         />
       ) : (
         <div className="mt-5 text-center">
@@ -74,6 +75,7 @@ export const Plot = () => {
             width={width}
             limits={limits}
             title="Matrix profile"
+            className="stroke-current text-red-900 stroke-2 text-opacity-80"
           />
         </div>
       ) : null}
@@ -86,12 +88,11 @@ export const Plot = () => {
             height={brushHeight}
             width={width}
             xScale={xScale}
-            limits={limits}
             setLimits={setLimits}
           />
         </div>
       ) : null}
-      {(profile === undefined) && (plotData !== undefined) ? (
+      {profile === undefined && plotData !== undefined ? (
         <div className="mt-5 text-center">
           <p>Use the "Calculate" button to cumpute the matrix profile.</p>
         </div>

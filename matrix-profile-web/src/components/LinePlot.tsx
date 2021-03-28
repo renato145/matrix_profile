@@ -9,6 +9,8 @@ interface Props {
   margins: Margins;
   limits: number[] | null;
   title?: string;
+  className: string;
+  showYAxis?: boolean;
 }
 
 export const LinePlot: React.FC<Props> = ({
@@ -19,8 +21,10 @@ export const LinePlot: React.FC<Props> = ({
   children,
   limits,
   title,
+  className,
+  showYAxis = true,
 }) => {
-  // const innerHeight = height - margins.top - margins.bottom;
+  const innerHeight = height - margins.top - margins.bottom;
   const innerWidth = width - margins.left - margins.right;
 
   const { x, yShow } = useMemo(() => {
@@ -47,7 +51,7 @@ export const LinePlot: React.FC<Props> = ({
 
   const path = useMemo(() => {
     if (yShow !== undefined) {
-      return line()(yShow.map((o, i) => [xScale(i+x[0]), yScale(o)]));
+      return line()(yShow.map((o, i) => [xScale(i + x[0]), yScale(o)]));
     }
     return null;
   }, [yShow, xScale, yScale, x]);
@@ -61,14 +65,20 @@ export const LinePlot: React.FC<Props> = ({
 
   const yAxisRef = useCallback(
     (node) => {
-      select(node).transition().call(yAxis);
+      if (showYAxis) select(node).transition().call(yAxis);
     },
-    [yAxis]
+    [showYAxis, yAxis]
   );
 
   return (
     <div className="bg-indigo-50 rounded-sm">
       <svg height={height} width={width}>
+        <rect
+          className="fill-current text-white"
+          transform={`translate(${margins.left},${margins.top})`}
+          width={innerWidth}
+          height={innerHeight}
+        />
         {title !== undefined ? (
           <text
             className="text-current text-2xl"
@@ -83,11 +93,7 @@ export const LinePlot: React.FC<Props> = ({
         />
         <g ref={yAxisRef} transform={`translate(${margins.left},0)`} />
         {path !== null ? (
-          <path
-            fill="none"
-            className="stroke-current text-blue-900 stroke-2 text-opacity-80"
-            d={path}
-          />
+          <path fill="none" className={className} d={path} />
         ) : null}
         {children}
       </svg>

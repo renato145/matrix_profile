@@ -1,3 +1,4 @@
+import { extent, line, scaleLinear } from "d3";
 import { brushX } from "d3-brush";
 import { ScaleLinear } from "d3-scale";
 import { select } from "d3-selection";
@@ -12,7 +13,6 @@ interface Props {
   height: number;
   margins: Margins;
   xScale: ScaleLinear<number, number>;
-  limits: number[] | null;
   setLimits: (x: number[] | null) => void;
 }
 
@@ -25,7 +25,6 @@ export const Brush: React.FC<Props> = ({
   width,
   margins,
   xScale,
-  limits,
   setLimits,
 }) => {
   const brushEnd = useCallback(
@@ -52,6 +51,20 @@ export const Brush: React.FC<Props> = ({
   const refTS = useRef<SVGGElement>(null);
   const refMP = useRef<SVGGElement>(null);
 
+  const yScaleMP = useMemo(() => {
+    const domain = extent(profile ?? [0, 100]).map((o?: number) => o ?? 0);
+    const range = [height - margins.bottom, margins.top];
+    const yScale = scaleLinear().domain(domain).range(range).nice();
+    return yScale;
+  }, [height, margins, profile]);
+
+  const pathMP = useMemo(() => {
+    if (profile !== undefined) {
+      return line()(profile.map((o, i) => [xScale(i), yScaleMP(o)]));
+    }
+    return null;
+  }, [profile, xScale, yScaleMP]);
+
   useEffect(() => {
     if (brush === undefined || refTS.current === null) return;
     select(refTS.current).call(brush);
@@ -67,20 +80,18 @@ export const Brush: React.FC<Props> = ({
         height={height}
         width={width}
         limits={null}
+        className="stroke-current text-blue-900 stroke-2 text-opacity-80"
+        showYAxis={false}
       >
         <g ref={refTS} />
+        {pathMP !== null ? (
+          <path
+            fill="none"
+            className="stroke-current text-red-900 stroke-2 text-opacity-80"
+            d={pathMP}
+          />
+        ) : null}
       </LinePlot>
-      {profile !== undefined ? (
-        <LinePlot
-          y={profile}
-          margins={margins}
-          height={height}
-          width={width}
-          limits={null}
-        >
-          <g ref={refMP} />
-        </LinePlot>
-      ) : null}
     </div>
   );
 };
