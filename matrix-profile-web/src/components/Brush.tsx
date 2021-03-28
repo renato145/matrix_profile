@@ -83,7 +83,6 @@ export const Brush: React.FC<Props> = ({
         className="stroke-current text-blue-900 stroke-2 text-opacity-80"
         showYAxis={false}
       >
-        <g ref={refTS} />
         {pathMP !== null ? (
           <path
             fill="none"
@@ -91,6 +90,7 @@ export const Brush: React.FC<Props> = ({
             d={pathMP}
           />
         ) : null}
+        <g ref={refTS} />
       </LinePlot>
     </div>
   );
