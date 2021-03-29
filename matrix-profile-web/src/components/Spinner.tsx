@@ -1,20 +1,25 @@
 import React from "react";
 
 const sizes = {
-  "sm": 3, "md": 4, "lg": 5
-}
+  sm: "h-3 w-3",
+  md: "h-4 w-4",
+  lg: "h-5 w-5",
+};
 
 interface Props {
   className?: string;
   size?: keyof typeof sizes;
 }
 
-export const Spinner: React.FC<Props> = ({ className, size="md" }) => {
+export const Spinner: React.FC<Props> = ({ className, size = "md" }) => {
   const sz = sizes[size];
-  const sizeCls = `h-${sz} w-${sz}`;
 
   return (
-    <svg className={`animate-spin ${sizeCls} ${className}`} fill="none" viewBox="0 0 24 24">
+    <svg
+      className={`animate-spin ${sz} ${className}`}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <circle
         className="opacity-25"
         cx="12"
