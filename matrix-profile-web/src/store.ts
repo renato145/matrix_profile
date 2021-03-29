@@ -22,6 +22,7 @@ export type TData = {
 export const yValue = (o: TData[0]) => o.value;
 
 export type TStore = {
+  windowSize: number;
   data?: TData;
   dataState: DataState;
   calcState: CalcState;
@@ -33,6 +34,7 @@ export type TStore = {
 };
 
 export const useStore = create<TStore>((set, get) => ({
+  windowSize: 50,
   dataState: DataState.Empty,
   calcState: CalcState.Empty,
   setData: (data) => set({ data }),
@@ -48,7 +50,7 @@ export const useStore = create<TStore>((set, get) => ({
     if (data === undefined) return;
     await sleep(0.1);
     const x = Float32Array.from(data.map(yValue));
-    const matrixProfile = NaiveMatrixProfile.calculate(x, 10);
+    const matrixProfile = NaiveMatrixProfile.calculate(x, get().windowSize);
     const profile = Array.from(matrixProfile.get_profile());
     set({ matrixProfile, profile, calcState: CalcState.Finished });
   },

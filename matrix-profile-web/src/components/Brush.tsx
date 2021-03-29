@@ -16,8 +16,6 @@ interface Props {
   setLimits: (x: number[] | null) => void;
 }
 
-// const initialLimit = 400;
-
 export const Brush: React.FC<Props> = ({
   y,
   profile,
