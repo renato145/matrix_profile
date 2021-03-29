@@ -33,13 +33,14 @@ module.exports = {
       //   })
       // );
 
+      // Does not builds with this :S
       // Worker loaders
-      const workerRegExp = /\.worker\.ts$/;
-      config.module.rules.push({
-        test: workerRegExp,
-        include: path.resolve(__dirname, "src"),
-        use: { loader: require.resolve("worker-loader"), options: {} },
-      });
+      // const workerRegExp = /\.worker\.(js|ts)$/;
+      // config.module.rules.push({
+      //   test: workerRegExp,
+      //   include: path.resolve(__dirname, "src"),
+      //   use: [{ loader: require.resolve("worker-loader"), options: {} }],
+      // });
 
       return config;
     },

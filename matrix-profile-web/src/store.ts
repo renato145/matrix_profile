@@ -2,8 +2,8 @@ import { csv } from "d3";
 import create from "zustand";
 import { wrap } from "comlink";
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import Worker from "worker-loader!./worker";
-import { TWorker } from "./worker";
+import Worker from "worker-loader!./wasm.worker.ts";
+import { TWorker } from "./wasm.worker";
 
 const worker = wrap<TWorker>(new Worker());
 
