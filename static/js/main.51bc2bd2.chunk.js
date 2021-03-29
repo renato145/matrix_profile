@@ -1,2 +1,0 @@
-(this["webpackJsonpmatrix-profile-web"]=this["webpackJsonpmatrix-profile-web"]||[]).push([[0],[function(r,e,t){"use strict";t.r(e),Promise.all([t.e(2),t.e(3)]).then(t.bind(null,1)).catch((function(r){return console.error("Error importing `setup.tsx`:",r)}))}],[[0,1]]]);
-//# sourceMappingURL=main.51bc2bd2.chunk.js.map
