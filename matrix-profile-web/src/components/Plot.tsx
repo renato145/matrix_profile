@@ -1,5 +1,5 @@
 import { scaleLinear } from "d3";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import useMeasure from "react-use-measure";
 import { TStore, useStore, yValue } from "../store";
 import { clamp } from "../utils";
