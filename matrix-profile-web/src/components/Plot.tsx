@@ -1,4 +1,3 @@
-import { scaleLinear } from "d3";
 import React, { useMemo, useRef, useState } from "react";
 import useMeasure from "react-use-measure";
 import { TStore, useStore, yValue } from "../store";
@@ -31,15 +30,7 @@ export const Plot = () => {
   const [ref, { height, width }] = useMeasure({ polyfill: ResizeObserver });
   const { data, profile, windowSize } = useStore(selector);
   const [limits, setLimits] = useState<number[] | null>(null);
-
   const plotData = useMemo(() => data?.map(yValue), [data]);
-
-  const xScale = useMemo(() => {
-    const domain = [0, plotData?.length ?? 100];
-    const range = [margins.left, width - margins.right];
-    const xScale = scaleLinear().domain(domain).range(range);
-    return xScale;
-  }, [plotData, width]);
 
   let dataHeight = profile === undefined ? height : height / 2;
   dataHeight = clamp(dataHeight, plotLimits.minHeight, plotLimits.maxHeight);
@@ -107,7 +98,6 @@ export const Plot = () => {
             margins={brushMargins}
             height={brushHeight}
             width={width}
-            xScale={xScale}
             setLimits={setLimits}
           />
         </div>

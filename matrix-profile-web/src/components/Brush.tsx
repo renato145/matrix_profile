@@ -1,6 +1,5 @@
 import { extent, line, scaleLinear } from "d3";
 import { brushX } from "d3-brush";
-import { ScaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { Margins } from "../types";
@@ -12,7 +11,6 @@ interface Props {
   width: number;
   height: number;
   margins: Margins;
-  xScale: ScaleLinear<number, number>;
   setLimits: (x: number[] | null) => void;
 }
 
@@ -22,9 +20,15 @@ export const Brush: React.FC<Props> = ({
   height,
   width,
   margins,
-  xScale,
   setLimits,
 }) => {
+  const xScale = useMemo(() => {
+    const domain = [0, y.length];
+    const range = [margins.left, width - margins.right];
+    const xScale = scaleLinear().domain(domain).range(range);
+    return xScale;
+  }, [y.length, margins.left, margins.right, width]);
+
   const brushEnd = useCallback(
     ({ selection, type }) => {
       if (selection === null) {
