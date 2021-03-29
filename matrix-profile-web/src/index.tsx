@@ -1,8 +1,17 @@
-// A dependency graph that contains any wasm must all be imported
-// asynchronously. This `index.js` file does the single async import, so
-// that no one else needs to worry about it again.
-import("./setup")
-  .catch(e => console.error("Error importing `setup.tsx`:", e));
+import React from "react";
+import ReactDOM from "react-dom";
+import reportWebVitals from "./reportWebVitals";
+import { App } from "./App";
+import "./index.css";
 
-// Need to make this file a module
-export {};
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById("root")
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
