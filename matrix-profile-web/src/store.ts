@@ -1,7 +1,11 @@
 import { csv } from "d3";
 import create from "zustand";
-import { NaiveMatrixProfile } from "matrix-profile-wasm";
-import { sleep } from "./utils";
+import { wrap } from "comlink";
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import Worker from "worker-loader!./worker";
+import { TWorker } from "./worker";
+
+const worker = wrap<TWorker>(new Worker());
 
 export enum DataState {
   Empty,
@@ -26,8 +30,8 @@ export type TStore = {
   data?: TData;
   dataState: DataState;
   calcState: CalcState;
-  matrixProfile?: NaiveMatrixProfile;
   profile?: number[];
+  profileIdxs?: number[];
   setData: (data: TData) => void;
   loadSampleData: () => void;
   calculate: () => void;
@@ -48,10 +52,11 @@ export const useStore = create<TStore>((set, get) => ({
     set({ calcState: CalcState.Loading });
     const data = get().data;
     if (data === undefined) return;
-    await sleep(0.1);
     const x = Float32Array.from(data.map(yValue));
-    const matrixProfile = NaiveMatrixProfile.calculate(x, get().windowSize);
-    const profile = Array.from(matrixProfile.get_profile());
-    set({ matrixProfile, profile, calcState: CalcState.Finished });
+    const { profileIdxs, profile } = await worker.calculate(
+      x,
+      get().windowSize
+    );
+    set({ profileIdxs, profile, calcState: CalcState.Finished });
   },
 }));

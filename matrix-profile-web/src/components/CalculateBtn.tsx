@@ -15,11 +15,7 @@ export const CalculateBtn: React.FC = () => {
     <div>
       <button
         className="btn"
-        onClick={async () => {
-          // const sleep = () => new Promise(() => calculate());
-          calculate();
-          // sleep();
-        }}
+        onClick={calculate}
         disabled={
           dataState === DataState.Empty || calcState !== CalcState.Empty
         }

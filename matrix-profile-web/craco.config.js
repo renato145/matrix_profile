@@ -33,6 +33,14 @@ module.exports = {
       //   })
       // );
 
+      // Worker loaders
+      const workerRegExp = /\.worker\.ts$/;
+      config.module.rules.push({
+        test: workerRegExp,
+        include: path.resolve(__dirname, "src"),
+        use: { loader: require.resolve("worker-loader"), options: {} },
+      });
+
       return config;
     },
   },

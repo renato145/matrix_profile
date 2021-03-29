@@ -13,6 +13,7 @@
     "@types/node": "^12.20.6",
     "@types/react": "^17.0.3",
     "@types/react-dom": "^17.0.3",
+    "comlink": "^4.3.0",
     "d3": "^6.6.1",
     "matrix-profile-wasm": "file:../matrix-profile-wasm/pkg",
     "react": "^17.0.2",
@@ -57,6 +58,7 @@
     "autoprefixer": "^9.8.6",
     "gh-pages": "^3.1.0",
     "postcss": "^7.0.35",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.4"
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.4",
+    "worker-loader": "^3.0.8"
   }
 }
