@@ -1,25 +1,40 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { CalcState, DataState, TStore, useStore } from "../store";
 import { Spinner } from "./Spinner";
 
-const selector = ({ dataState, calcState, calculate }: TStore) => ({
+const selector = ({
   dataState,
   calcState,
+  windowSize,
+  lastWindowSize,
+  calculate,
+}: TStore) => ({
+  dataState,
+  calcState,
+  windowSize,
+  lastWindowSize,
   calculate,
 });
 
 export const CalculateBtn: React.FC = () => {
-  const { dataState, calcState, calculate } = useStore(selector);
+  const {
+    dataState,
+    calcState,
+    windowSize,
+    lastWindowSize,
+    calculate,
+  } = useStore(selector);
+
+  const disabled = useMemo(() => {
+    const notWindowChanged = windowSize === (lastWindowSize ?? -1);
+    const stateReady =
+      dataState === DataState.Empty || calcState !== CalcState.Empty;
+    return notWindowChanged && stateReady;
+  }, [calcState, dataState, lastWindowSize, windowSize]);
 
   return (
     <div>
-      <button
-        className="btn"
-        onClick={calculate}
-        disabled={
-          dataState === DataState.Empty || calcState !== CalcState.Empty
-        }
-      >
+      <button className="btn" onClick={calculate} disabled={disabled}>
         <div className="flex items-baseline">
           Calculate
           {calcState === CalcState.Loading ? (

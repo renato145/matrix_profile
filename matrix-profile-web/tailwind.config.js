@@ -9,5 +9,8 @@ module.exports = {
       opacity: ["disabled"],
       backgroundColor: ["active", "disabled"],
     },
-  }
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+  ],
 };

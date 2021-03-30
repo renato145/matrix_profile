@@ -10,12 +10,14 @@ export const LoadSampleBtn: React.FC = () => {
   const { loadSampleData, dataState } = useStore(selector);
 
   return (
-    <button
-      className="btn"
-      onClick={loadSampleData}
-      disabled={dataState === DataState.SampleData}
-    >
-      Load sample
-    </button>
+    <div>
+      <button
+        className="btn"
+        onClick={loadSampleData}
+        disabled={dataState === DataState.SampleData}
+      >
+        Load sample
+      </button>
+    </div>
   );
 };
