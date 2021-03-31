@@ -49,7 +49,7 @@ export const Plot = () => {
     <div
       ref={ref}
       style={{ minWidth: "300px" }}
-      className="mt-4 flex flex-col flex-1"
+      className="mt-4 flex flex-col"
     >
       <ColumnSelector />
       {plotData !== undefined ? (
