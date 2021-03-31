@@ -26,7 +26,7 @@ export const CalculateBtn: React.FC = () => {
   } = useStore(selector);
 
   const disabled = useMemo(() => {
-    const notWindowChanged = windowSize === (lastWindowSize ?? -1);
+    const notWindowChanged = windowSize === (lastWindowSize ?? windowSize);
     const stateReady =
       dataState === DataState.Empty || calcState !== CalcState.Empty;
     return notWindowChanged && stateReady;
