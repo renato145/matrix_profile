@@ -20,10 +20,11 @@ export const WindowSizeSel: React.FC = () => {
       <input
         type="number"
         min={0}
+        step={5}
         disabled={calcState === CalcState.Loading}
         defaultValue={windowSize}
         onChange={onChange}
-        className="ml-2 w-20 py-0.5 rounded-md bg-gray-200 border-2 border-transparent focus:border-gray-500 focus:bg-gray-100 hover:border-gray-500 focus:ring-0 text-center text-base"
+        className="ml-2 w-20 md:w-28 py-0.5 rounded-md border focus:border-gray-600 hover:shadow text-center"
       />
     </div>
   );

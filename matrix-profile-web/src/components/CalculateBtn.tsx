@@ -33,15 +33,11 @@ export const CalculateBtn: React.FC = () => {
   }, [calcState, dataState, lastWindowSize, windowSize]);
 
   return (
-    <div>
-      <button className="btn" onClick={calculate} disabled={disabled}>
-        <div className="flex items-baseline">
-          Calculate
-          {calcState === CalcState.Loading ? (
-            <Spinner className="ml-1" />
-          ) : null}
-        </div>
-      </button>
-    </div>
+    <button className="btn" onClick={calculate} disabled={disabled}>
+      <div className="flex items-baseline">
+        Calculate
+        {calcState === CalcState.Loading ? <Spinner className="ml-1" /> : null}
+      </div>
+    </button>
   );
 };

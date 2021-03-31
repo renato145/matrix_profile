@@ -1,23 +1,24 @@
-import React from "react";
-import { DataState, TStore, useStore } from "../store";
+import React, { useMemo } from "react";
+import { CalcState, DataState, TStore, useStore } from "../store";
 
-const selector = ({ loadSampleData, dataState }: TStore) => ({
+const selector = ({ loadSampleData, dataState, calcState }: TStore) => ({
   loadSampleData,
   dataState,
+  calcState,
 });
 
 export const LoadSampleBtn: React.FC = () => {
-  const { loadSampleData, dataState } = useStore(selector);
+  const { loadSampleData, dataState, calcState } = useStore(selector);
+
+  const disabled = useMemo(() => {
+    return (
+      dataState === DataState.SampleData || calcState === CalcState.Loading
+    );
+  }, [calcState, dataState]);
 
   return (
-    <div>
-      <button
-        className="btn"
-        onClick={loadSampleData}
-        disabled={dataState === DataState.SampleData}
-      >
-        Load sample
-      </button>
-    </div>
+    <button className="btn" onClick={loadSampleData} disabled={disabled}>
+      Load sample
+    </button>
   );
 };

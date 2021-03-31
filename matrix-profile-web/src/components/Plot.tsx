@@ -1,14 +1,16 @@
 import React, { useMemo, useRef, useState } from "react";
 import useMeasure from "react-use-measure";
-import { TStore, useStore, yValue } from "../store";
+import { DataState, TStore, useStore, yValue } from "../store";
 import { clamp } from "../utils";
 import { Brush } from "./Brush";
+import { ColumnSelector } from "./ColumnSelector";
 import { LinePlot } from "./LinePlot";
 
-const selector = ({ data, profile, windowSize }: TStore) => ({
+const selector = ({ data, profile, windowSize, dataState }: TStore) => ({
   data,
   profile,
   windowSize,
+  dataState,
 });
 
 const margins = {
@@ -28,7 +30,7 @@ const brushLimits = { minHeight: 50, maxHeight: 120 };
 
 export const Plot = () => {
   const [ref, { height, width }] = useMeasure({ polyfill: ResizeObserver });
-  const { data, profile, windowSize } = useStore(selector);
+  const { data, profile, windowSize, dataState } = useStore(selector);
   const [limits, setLimits] = useState<number[] | null>(null);
   const plotData = useMemo(() => data?.map(yValue), [data]);
 
@@ -49,22 +51,29 @@ export const Plot = () => {
       style={{ minWidth: "300px" }}
       className="mt-4 flex flex-col flex-1"
     >
+      <ColumnSelector />
       {plotData !== undefined ? (
-        <LinePlot
-          ref={cursorRefTS}
-          refB={cursorRefMP}
-          y={plotData}
-          margins={margins}
-          height={dataHeight}
-          width={width}
-          limits={limits}
-          title="Time series data"
-          className="stroke-current text-blue-900 stroke-2 text-opacity-80"
-          cursorBrush
-          brushClassName="fill-current text-blue-400 opacity-30"
-          windowSize={windowSize}
-          windowSizeB={1}
-        />
+        <div className="mt-3">
+          <LinePlot
+            ref={cursorRefTS}
+            refB={cursorRefMP}
+            y={plotData}
+            margins={margins}
+            height={dataHeight}
+            width={width}
+            limits={limits}
+            title="Time series data"
+            className="stroke-current text-blue-900 stroke-2 text-opacity-80"
+            cursorBrush
+            brushClassName="fill-current text-blue-400 opacity-30"
+            windowSize={windowSize}
+            windowSizeB={1}
+          />
+        </div>
+      ) : dataState === DataState.SelectColumn ? (
+        <div className="mt-5 text-center">
+          <p>Select one column to plot.</p>
+        </div>
       ) : (
         <div className="mt-5 text-center">
           <p>Upload some time series data or Load the sample data.</p>
@@ -104,7 +113,7 @@ export const Plot = () => {
       ) : null}
       {profile === undefined && plotData !== undefined ? (
         <div className="mt-5 text-center">
-          <p>Use the "Calculate" button to cumpute the matrix profile.</p>
+          <p>Use the "Calculate" button to compute the matrix profile.</p>
         </div>
       ) : null}
     </div>
