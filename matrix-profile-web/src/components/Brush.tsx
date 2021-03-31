@@ -3,6 +3,7 @@ import { brushX } from "d3-brush";
 import { select } from "d3-selection";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { Margins } from "../types";
+import { DownloadCSV } from "./DownloadCSV";
 import { LinePlot } from "./LinePlot";
 
 interface Props {
@@ -75,7 +76,7 @@ export const Brush: React.FC<Props> = ({
   }, [brush, xScale, y.length, profile]);
 
   return (
-    <div>
+    <div className="flex flex-col">
       <LinePlot
         y={y}
         margins={margins}
@@ -94,6 +95,9 @@ export const Brush: React.FC<Props> = ({
         ) : null}
         <g ref={refTS} />
       </LinePlot>
+      {pathMP !== null ? (
+          <DownloadCSV className="mt-2 ml-auto mr-2" />
+      ) : null}
     </div>
   );
 };

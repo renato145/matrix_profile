@@ -9,7 +9,7 @@ export const App = () => {
   return (
     <div className="flex flex-col container mx-auto px-10 pt-6 min-h-screen">
       <p className="text-5xl font-bold">Matrix Profile</p>
-      <div className="mt-14 pr-4 flex justify-between">
+      <div className="mt-8 pr-4 flex justify-between">
         {/* <p>upload data button</p> */}
         {/* <p>info for uploading</p> */}
         <WindowSizeSel />
