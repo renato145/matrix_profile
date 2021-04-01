@@ -4,7 +4,7 @@ import { wrap } from "comlink";
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import Worker from "worker-loader!./wasm.worker.ts";
 import { TWorker } from "./wasm.worker";
-import { extractFilename } from "./utils";
+import { clamp, extractFilename } from "./utils";
 
 const worker = wrap<TWorker>(new Worker());
 
@@ -62,10 +62,11 @@ export type TStore = {
   loadSampleData: () => void;
   uploadData: (data: string, path?: string) => void;
   calculate: () => void;
+  brushPosition: number;
+  nearestNeighbourPosition: number;
+  setBrushPosition: (x: number) => void;
   /** If neighbour is not found `-1` is returned */
   getNearestNeighbour: (idx: number) => number;
-  brushPosition: number;
-  setBrushPosition: (x: number) => void;
 };
 
 export const useStore = create<TStore>((set, get) => ({
@@ -131,8 +132,18 @@ export const useStore = create<TStore>((set, get) => ({
   getNearestNeighbour: (idx) => {
     const pIdxs = get().profileIdxs;
     if (pIdxs === undefined) return -1;
-    return pIdxs[idx];
+    console.log(idx, Math.round(idx), pIdxs[Math.round(idx)]);
+    return pIdxs[Math.round(idx)] ?? -1;
   },
   brushPosition: -1,
-  setBrushPosition: (x) => set({ brushPosition: x }),
+  nearestNeighbourPosition: -1,
+  setBrushPosition: (x) => {
+    return set(({ getNearestNeighbour, nRows }) => {
+      const brushPosition = clamp(Math.floor(x), 0, (nRows ?? 1) - 1);
+      return {
+        brushPosition,
+        nearestNeighbourPosition: getNearestNeighbour(brushPosition),
+      };
+    });
+  },
 }));

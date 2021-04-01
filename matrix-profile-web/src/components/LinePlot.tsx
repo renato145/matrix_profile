@@ -1,11 +1,5 @@
 import { axisBottom, axisLeft, extent, line, scaleLinear, select } from "d3";
-import React, {
-  forwardRef,
-  ReactNode,
-  RefObject,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { CSSProperties, useCallback, useMemo, useRef } from "react";
 import { TStore, useStore } from "../store";
 import { Margins } from "../types";
 
@@ -26,159 +20,172 @@ interface Props {
   cursorBrush?: boolean;
   /** Classname for the `cursorBrush` */
   brushClassName?: string;
+  /** Classname for the a cursor that points the nearest element */
+  brushNearestClassName?: string;
+  /** Custom styles for the a cursor that points the nearest element */
+  brushNearestStyle?: CSSProperties;
   /** Window size for `cursorBrush` */
   windowSize?: number;
-  /** Window size for external brush referenced by `refB` */
-  children?: ReactNode;
 }
 
 const selector = ({
   brushPosition,
   setBrushPosition,
-  getNearestNeighbour,
+  nearestNeighbourPosition,
 }: TStore) => ({
   brushPosition,
   setBrushPosition,
-  getNearestNeighbour,
+  nearestNeighbourPosition,
 });
 
-export const LinePlot = forwardRef<SVGRectElement, Props>(
-  (
-    {
-      y,
-      yLength,
-      margins,
-      height,
-      width,
-      children,
-      limits,
-      title,
-      className,
-      windowSize,
-      brushClassName,
-      showYAxis = true,
-      cursorBrush = false,
+export const LinePlot: React.FC<Props> = ({
+  y,
+  yLength,
+  margins,
+  height,
+  width,
+  limits,
+  title,
+  className,
+  brushNearestStyle,
+  windowSize,
+  brushClassName,
+  brushNearestClassName,
+  showYAxis = true,
+  cursorBrush = false,
+  children,
+}) => {
+  const innerHeight = height - margins.top - margins.bottom;
+  const innerWidth = width - margins.left - margins.right;
+
+  const { x, yShow } = useMemo(() => {
+    return limits === null
+      ? { x: [0, yLength ?? y.length], yShow: y }
+      : { x: [limits[0], limits[1]], yShow: y.slice(limits[0], limits[1]) };
+  }, [limits, y, yLength]);
+
+  const { xAxis, xScale } = useMemo(() => {
+    const domain = x;
+    const range = [margins.left, width - margins.right];
+    const xScale = scaleLinear().domain(domain).range(range);
+    const xAxis = axisBottom(xScale).tickSize(5).tickSizeOuter(0);
+    return { xAxis, xScale };
+  }, [margins.left, margins.right, width, x]);
+
+  const { yAxis, yScale } = useMemo(() => {
+    const domain = extent(y).map((o?: number) => o ?? 0);
+    const range = [height - margins.bottom, margins.top];
+    const yScale = scaleLinear().domain(domain).range(range).nice();
+    const yAxis = axisLeft(yScale).tickSize(-innerWidth).ticks(4);
+    return { yScale, yAxis };
+  }, [y, height, margins, innerWidth]);
+
+  const path = useMemo(() => {
+    if (yShow !== undefined) {
+      return line()(yShow.map((o, i) => [xScale(i + x[0]), yScale(o)]));
+    }
+    return null;
+  }, [yShow, xScale, yScale, x]);
+
+  const xAxisRef = useCallback(
+    (node) => {
+      select(node).call(xAxis);
     },
-    cursorRef
-  ) => {
-    const innerHeight = height - margins.top - margins.bottom;
-    const innerWidth = width - margins.left - margins.right;
+    [xAxis]
+  );
 
-    const { x, yShow } = useMemo(() => {
-      return limits === null
-        ? { x: [0, yLength ?? y.length], yShow: y }
-        : { x: [limits[0], limits[1]], yShow: y.slice(limits[0], limits[1]) };
-    }, [limits, y, yLength]);
+  const yAxisRef = useCallback(
+    (node) => {
+      if (showYAxis) select(node).transition().call(yAxis);
+    },
+    [showYAxis, yAxis]
+  );
+  const cursorRef = useRef<SVGRectElement>(null);
 
-    const { xAxis, xScale } = useMemo(() => {
-      const domain = x;
-      const range = [margins.left, width - margins.right];
-      const xScale = scaleLinear().domain(domain).range(range);
-      const xAxis = axisBottom(xScale).tickSize(5).tickSizeOuter(0);
-      return { xAxis, xScale };
-    }, [margins.left, margins.right, width, x]);
+  const scaleWindowSize = useMemo(
+    () =>
+      windowSize === 1 ? 1 : Math.abs(xScale(0) - xScale(windowSize ?? 0)),
+    [windowSize, xScale]
+  );
 
-    const { yAxis, yScale } = useMemo(() => {
-      const domain = extent(y).map((o?: number) => o ?? 0);
-      const range = [height - margins.bottom, margins.top];
-      const yScale = scaleLinear().domain(domain).range(range).nice();
-      const yAxis = axisLeft(yScale).tickSize(-innerWidth).ticks(4);
-      return { yScale, yAxis };
-    }, [y, height, margins, innerWidth]);
+  const {
+    brushPosition,
+    setBrushPosition,
+    nearestNeighbourPosition,
+  } = useStore(selector);
 
-    const path = useMemo(() => {
-      if (yShow !== undefined) {
-        return line()(yShow.map((o, i) => [xScale(i + x[0]), yScale(o)]));
-      }
-      return null;
-    }, [yShow, xScale, yScale, x]);
+  const { brushXPosition, brushWindowSize } = useMemo(() => {
+    const brushXPosition = xScale(brushPosition) - margins.left;
+    const brushWindowSize =
+      brushPosition === -1
+        ? 0
+        : Math.min(innerWidth - brushXPosition, scaleWindowSize);
+    return { brushXPosition, brushWindowSize };
+  }, [brushPosition, innerWidth, margins.left, scaleWindowSize, xScale]);
 
-    const xAxisRef = useCallback(
-      (node) => {
-        select(node).call(xAxis);
-      },
-      [xAxis]
-    );
+  const { brushNearestXPosition, brushNearestWindowSize } = useMemo(() => {
+    const brushNearestXPosition =
+      xScale(nearestNeighbourPosition) - margins.left;
+    const brushNearestWindowSize =
+      nearestNeighbourPosition === -1
+        ? 0
+        : Math.min(innerWidth - brushNearestXPosition, scaleWindowSize);
+    return { brushNearestXPosition, brushNearestWindowSize };
+  }, [
+    innerWidth,
+    margins.left,
+    nearestNeighbourPosition,
+    scaleWindowSize,
+    xScale,
+  ]);
 
-    const yAxisRef = useCallback(
-      (node) => {
-        if (showYAxis) select(node).transition().call(yAxis);
-      },
-      [showYAxis, yAxis]
-    );
+  const onCursorMove = useCallback(
+    ({ clientX, target }) => {
+      const ref = cursorRef as React.RefObject<SVGRectElement>;
+      if (ref.current === null) return;
+      const { x } = target.getBoundingClientRect();
+      const newX = clientX - Math.round(x);
+      setBrushPosition(xScale.invert(newX + margins.left - 1));
+    },
+    [margins.left, setBrushPosition, xScale]
+  );
 
-    const scaleWindowSize = useMemo(
-      () =>
-        windowSize === 1 ? 1 : Math.abs(xScale(0) - xScale(windowSize ?? 0)),
-      [windowSize, xScale]
-    );
-
-    const { brushPosition, setBrushPosition, getNearestNeighbour } = useStore(
-      selector
-    );
-
-    const { brushXPosition, brushWindowSize } = useMemo(() => {
-      const brushXPosition = xScale(brushPosition);
-      const brushWindowSize =
-        brushPosition === -1
-          ? 0
-          : Math.min(innerWidth - brushXPosition, scaleWindowSize);
-      return { brushXPosition, brushWindowSize };
-    }, [brushPosition, innerWidth, scaleWindowSize, xScale]);
-
-    const updateNearestNeighbour = useCallback(
-      (x: number) => {
-        const idx = Math.round(xScale.invert(x + margins.left));
-        const nearest_idx = getNearestNeighbour(idx);
-        // if (windowSize !== undefined) console.log(idx, nearest_idx);
-      },
-      [getNearestNeighbour, margins.left, xScale]
-    );
-
-    const onCursorMove = useCallback(
-      ({ clientX, target }) => {
-        const ref = cursorRef as React.RefObject<SVGRectElement>;
-        if (ref.current === null) return;
-        const { x } = target.getBoundingClientRect();
-        const newX = clientX - x;
-        setBrushPosition(xScale.invert(newX));
-        // updateNearestNeighbour(newX);
-      },
-      [cursorRef, setBrushPosition, xScale]
-    );
-
-    const onCursorLeave = useCallback(() => {
-      setBrushPosition(-1);
-    }, [setBrushPosition]);
-
-    return (
-      <div className="bg-indigo-50 rounded-sm">
-        <svg height={height} width={width}>
+  return (
+    <div className="bg-indigo-50 rounded-sm">
+      <svg height={height} width={width}>
+        <rect
+          className="fill-current text-white"
+          transform={`translate(${margins.left},${margins.top})`}
+          width={innerWidth}
+          height={innerHeight}
+        />
+        {title !== undefined ? (
+          <text
+            className="text-current text-2xl"
+            transform={`translate(${margins.left + 5}, ${margins.top - 10})`}
+          >
+            {title}
+          </text>
+        ) : null}
+        <g
+          ref={xAxisRef}
+          transform={`translate(0,${height - margins.bottom})`}
+        />
+        <g ref={yAxisRef} transform={`translate(${margins.left},0)`} />
+        {path !== null ? (
+          <path fill="none" className={className} d={path} />
+        ) : null}
+        {children}
+        <g transform={`translate(${margins.left},${margins.top})`}>
           <rect
-            className="fill-current text-white"
-            transform={`translate(${margins.left},${margins.top})`}
-            width={innerWidth}
+            className={brushNearestClassName}
+            style={brushNearestStyle}
             height={innerHeight}
+            x={brushNearestXPosition}
+            width={brushNearestWindowSize}
           />
-          {title !== undefined ? (
-            <text
-              className="text-current text-2xl"
-              transform={`translate(${margins.left + 5}, ${margins.top - 10})`}
-            >
-              {title}
-            </text>
-          ) : null}
-          <g
-            ref={xAxisRef}
-            transform={`translate(0,${height - margins.bottom})`}
-          />
-          <g ref={yAxisRef} transform={`translate(${margins.left},0)`} />
-          {path !== null ? (
-            <path fill="none" className={className} d={path} />
-          ) : null}
-          {children}
           {cursorBrush ? (
-            <g transform={`translate(${margins.left},${margins.top})`}>
+            <>
               <rect
                 ref={cursorRef}
                 className={brushClassName}
@@ -191,12 +198,11 @@ export const LinePlot = forwardRef<SVGRectElement, Props>(
                 width={innerWidth}
                 height={innerHeight}
                 onPointerMove={onCursorMove}
-                onPointerLeave={onCursorLeave}
               />
-            </g>
+            </>
           ) : null}
-        </svg>
-      </div>
-    );
-  }
-);
+        </g>
+      </svg>
+    </div>
+  );
+};

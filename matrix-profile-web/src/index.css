@@ -19,11 +19,6 @@
 }
 
 @layer components {
-  .font-custom {
-    font-family: "Oswald", sans-serif;
-    @apply text-red-900;
-  }
-
   .btn {
     @apply bg-gray-500 disabled:bg-gray-500 hover:bg-green-600 active:bg-green-800 px-2 py-1 rounded text-white transition focus:outline-none focus:ring;
   }
@@ -47,4 +42,27 @@
   .btn-lg {
     @apply px-6 py-2 text-lg;
   }
+}
+
+@layer utilities {
+  .font-custom {
+    font-family: "Oswald", sans-serif;
+  }
+
+  .fill-none {
+    fill: none;
+  }
+
+  .stroke-dashed-2 {
+    stroke-dasharray: 2;
+  }
+
+  .stroke-dashed-4 {
+    stroke-dasharray: 4;
+  }
+
+  .stroke-dashed-8 {
+    stroke-dasharray: 8;
+  }
+
 }

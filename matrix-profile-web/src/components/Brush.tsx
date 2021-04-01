@@ -11,6 +11,7 @@ interface Props {
   width: number;
   height: number;
   margins: Margins;
+  windowSize?: number;
   setLimits: (x: number[] | null) => void;
 }
 
@@ -20,6 +21,7 @@ export const Brush: React.FC<Props> = ({
   height,
   width,
   margins,
+  windowSize,
   setLimits,
 }) => {
   const xScale = useMemo(() => {
@@ -84,6 +86,9 @@ export const Brush: React.FC<Props> = ({
         limits={null}
         className="stroke-current text-blue-900 stroke-2 text-opacity-80"
         showYAxis={false}
+        windowSize={windowSize}
+        brushNearestClassName="fill-current text-blue-600 opacity-80 stroke-current stroke-2 stroke-dashed-8"
+        brushNearestStyle={{ fillOpacity: 0.1 }}
       >
         {pathMP !== null ? (
           <path
