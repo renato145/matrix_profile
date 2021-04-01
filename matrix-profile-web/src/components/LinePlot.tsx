@@ -180,7 +180,6 @@ export const LinePlot: React.FC<Props> = ({
         {path !== null ? (
           <path fill="none" className={className} d={path} />
         ) : null}
-        {children}
         <g transform={`translate(${margins.left},${margins.top})`}>
           <rect
             className={brushNearestClassName}
@@ -207,6 +206,7 @@ export const LinePlot: React.FC<Props> = ({
             </>
           ) : null}
         </g>
+        {children}
       </svg>
     </div>
   );

@@ -52,8 +52,7 @@ export const Brush: React.FC<Props> = ({
     return brush;
   }, [margins, width, height, brushEnd]);
 
-  const refTS = useRef<SVGGElement>(null);
-  const refMP = useRef<SVGGElement>(null);
+  const ref = useRef<SVGGElement>(null);
 
   const yScaleMP = useMemo(() => {
     const domain = extent(profile ?? [0, 100]).map((o?: number) => o ?? 0);
@@ -70,10 +69,8 @@ export const Brush: React.FC<Props> = ({
   }, [profile, xScale, yScaleMP]);
 
   useEffect(() => {
-    if (brush === undefined || refTS.current === null) return;
-    select(refTS.current).call(brush);
-    if (refMP.current !== null) select(refMP.current).call(brush);
-    // if (y.length > initialLimit) g.call(brush.move, [0, initialLimit].map(xScale));
+    if (brush === undefined || ref.current === null) return;
+    select(ref.current).call(brush);
   }, [brush, xScale, y.length, profile]);
 
   return (
@@ -87,8 +84,8 @@ export const Brush: React.FC<Props> = ({
         className="stroke-current text-blue-900 stroke-2 text-opacity-80"
         showYAxis={false}
         windowSize={windowSize}
-        brushNearestClassName="fill-current text-blue-600 opacity-80 stroke-current stroke-2 stroke-dashed-8"
-        brushNearestStyle={{ fillOpacity: 0.1 }}
+            brushNearestClassName="fill-current text-blue-600 opacity-80 stroke-current stroke-2 stroke-dashed-8"
+            brushNearestStyle={{fillOpacity: 0.1}}
       >
         {pathMP !== null ? (
           <path
@@ -97,7 +94,7 @@ export const Brush: React.FC<Props> = ({
             d={pathMP}
           />
         ) : null}
-        <g ref={refTS} />
+        <g ref={ref} />
       </LinePlot>
     </div>
   );
