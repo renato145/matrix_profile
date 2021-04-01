@@ -124,12 +124,17 @@ export const LinePlot: React.FC<Props> = ({
   }, [brushPosition, innerWidth, margins.left, scaleWindowSize, xScale]);
 
   const { brushNearestXPosition, brushNearestWindowSize } = useMemo(() => {
-    const brushNearestXPosition =
-      xScale(nearestNeighbourPosition) - margins.left;
+    const xPosition = xScale(nearestNeighbourPosition) - margins.left;
+    const brushNearestXPosition = Math.max(0, xPosition);
+    const leftCap = xPosition + scaleWindowSize;
     const brushNearestWindowSize =
-      nearestNeighbourPosition === -1
+      xPosition === -1 || leftCap < margins.left
         ? 0
-        : Math.min(innerWidth - brushNearestXPosition, scaleWindowSize);
+        : Math.min(
+            leftCap,
+            scaleWindowSize,
+            innerWidth - brushNearestXPosition
+          );
     return { brushNearestXPosition, brushNearestWindowSize };
   }, [
     innerWidth,
