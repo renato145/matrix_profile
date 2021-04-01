@@ -4,6 +4,7 @@ import { DataState, TStore, useStore, yValue } from "../store";
 import { clamp } from "../utils";
 import { Brush } from "./Brush";
 import { ColumnSelector } from "./ColumnSelector";
+import { DownloadCSV } from "./DownloadCSV";
 import { LinePlot } from "./LinePlot";
 
 const selector = ({ data, profile, windowSize, dataState }: TStore) => ({
@@ -46,11 +47,7 @@ export const Plot = () => {
   const cursorRefMP = useRef<SVGRectElement>(null);
 
   return (
-    <div
-      ref={ref}
-      style={{ minWidth: "300px" }}
-      className="mt-4 flex flex-col"
-    >
+    <div ref={ref} style={{ minWidth: "300px" }} className="mt-4 flex flex-col">
       <ColumnSelector />
       {plotData !== undefined ? (
         <div className="mt-3">
@@ -111,7 +108,9 @@ export const Plot = () => {
           />
         </div>
       ) : null}
-      {profile === undefined && plotData !== undefined ? (
+      {profile !== undefined ? (
+        <DownloadCSV className="mt-2 ml-auto mr-2" />
+      ) : plotData !== undefined ? (
         <div className="mt-5 text-center">
           <p>Use the "Calculate" button to compute the matrix profile.</p>
         </div>

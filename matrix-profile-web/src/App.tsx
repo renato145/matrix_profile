@@ -9,7 +9,7 @@ import { RepoDescription } from "./components/RepoDescription";
 
 export const App = () => {
   return (
-    <div className="flex flex-col container mx-auto px-10 pt-6 min-h-screen">
+    <div className="flex flex-col container mx-auto px-10 pt-6 pb-2 min-h-screen">
       <p className="text-5xl font-bold">Matrix Profile</p>
       <RepoDescription />
       <div className="mt-8 pr-4 flex flex-col sm:flex-row flex-wrap justify-between">
