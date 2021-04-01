@@ -46,6 +46,7 @@ export type TStore = {
   windowSize: number;
   lastWindowSize?: number;
   data?: TData;
+  nRows?: number;
   dataState: DataState;
   calcState: CalcState;
   profile?: number[];
@@ -72,7 +73,12 @@ export const useStore = create<TStore>((set, get) => ({
     set(({ csvData }) => {
       if (csvData === undefined) return { dataState: DataState.Error };
       const data = csvData.map((row) => ({ value: +(row[column] ?? "") }));
-      return { data, selectedColumn: column, dataState: DataState.CustomData };
+      return {
+        data,
+        nRows: data.length,
+        selectedColumn: column,
+        dataState: DataState.CustomData,
+      };
     });
   },
   loadSampleData: async () => {
@@ -81,6 +87,7 @@ export const useStore = create<TStore>((set, get) => ({
     }));
     set({
       data,
+      nRows: data.length,
       dataState: DataState.SampleData,
       ...emptyCalc,
       ...emptyCsvData,
@@ -95,6 +102,7 @@ export const useStore = create<TStore>((set, get) => ({
       csvData,
       csvColumns,
       data: undefined,
+      nRows: undefined,
       dataState: DataState.SelectColumn,
       selectedColumn: undefined,
       ...emptyCalc,

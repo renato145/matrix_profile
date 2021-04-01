@@ -1,19 +1,31 @@
+import { format } from "d3-format";
 import React from "react";
 import { DataState, TStore, useStore } from "../store";
 
-const selector = ({dataState, filename}: TStore) => ({dataState, filename});
+const selector = ({ nRows, dataState, filename }: TStore) => ({
+  nRows,
+  dataState,
+  filename,
+});
+
+const formatNumber = format(",.2r");
 
 export const DataDescription: React.FC = () => {
-  const { dataState, filename } = useStore(selector);
+  const { nRows, dataState, filename } = useStore(selector);
   const show =
     dataState === DataState.SampleData || dataState === DataState.CustomData;
-  const fn = filename ?? "custom_file"
+  const fn = filename ?? "custom_file";
 
   return show ? (
     <div className="mt-4 text-base text-gray-700">
       <p className="inline font-medium">Data: </p>
       {dataState === DataState.CustomData ? (
-        <p className="inline">{fn}</p>
+        <p className="inline">
+          {fn}{" "}
+          {nRows !== undefined ? (
+            <span className="text-sm">({formatNumber(nRows)} rows)</span>
+          ) : null}
+        </p>
       ) : (
         <>
           <p className="inline">
