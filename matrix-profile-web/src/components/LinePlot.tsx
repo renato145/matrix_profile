@@ -26,19 +26,21 @@ interface Props {
   cursorBrush?: boolean;
   /** Classname for the `cursorBrush` */
   brushClassName?: string;
-  /**
-   * A reference for an external brush object, to be updated in the at
-   * the same time as `cursorBrush`, beware that the local xScale is used
-   */
-  refB?: RefObject<SVGRectElement>;
   /** Window size for `cursorBrush` */
   windowSize?: number;
   /** Window size for external brush referenced by `refB` */
-  windowSizeB?: number;
   children?: ReactNode;
 }
 
-const selector = (props: TStore) => props.getNearestNeighbour;
+const selector = ({
+  brushPosition,
+  setBrushPosition,
+  getNearestNeighbour,
+}: TStore) => ({
+  brushPosition,
+  setBrushPosition,
+  getNearestNeighbour,
+});
 
 export const LinePlot = forwardRef<SVGRectElement, Props>(
   (
@@ -52,9 +54,7 @@ export const LinePlot = forwardRef<SVGRectElement, Props>(
       limits,
       title,
       className,
-      refB,
       windowSize,
-      windowSizeB,
       brushClassName,
       showYAxis = true,
       cursorBrush = false,
@@ -108,22 +108,29 @@ export const LinePlot = forwardRef<SVGRectElement, Props>(
     );
 
     const scaleWindowSize = useMemo(
-      () => Math.abs(xScale(0) - xScale(windowSize ?? 0)),
+      () =>
+        windowSize === 1 ? 1 : Math.abs(xScale(0) - xScale(windowSize ?? 0)),
       [windowSize, xScale]
     );
 
-    const scaleWindowSizeB = useMemo(
-      () => Math.abs(xScale(0) - xScale(windowSizeB ?? 0)),
-      [windowSizeB, xScale]
+    const { brushPosition, setBrushPosition, getNearestNeighbour } = useStore(
+      selector
     );
 
-    const getNearestNeighbour = useStore(selector);
+    const { brushXPosition, brushWindowSize } = useMemo(() => {
+      const brushXPosition = xScale(brushPosition);
+      const brushWindowSize =
+        brushPosition === -1
+          ? 0
+          : Math.min(innerWidth - brushXPosition, scaleWindowSize);
+      return { brushXPosition, brushWindowSize };
+    }, [brushPosition, innerWidth, scaleWindowSize, xScale]);
 
     const updateNearestNeighbour = useCallback(
       (x: number) => {
         const idx = Math.round(xScale.invert(x + margins.left));
         const nearest_idx = getNearestNeighbour(idx);
-        console.log(idx, nearest_idx);
+        // if (windowSize !== undefined) console.log(idx, nearest_idx);
       },
       [getNearestNeighbour, margins.left, xScale]
     );
@@ -132,33 +139,17 @@ export const LinePlot = forwardRef<SVGRectElement, Props>(
       ({ clientX, target }) => {
         const ref = cursorRef as React.RefObject<SVGRectElement>;
         if (ref.current === null) return;
-        const { x, width } = target.getBoundingClientRect();
+        const { x } = target.getBoundingClientRect();
         const newX = clientX - x;
-        const newWidth = Math.min(width - newX, scaleWindowSize);
-        ref.current.setAttribute("x", "" + newX);
-        ref.current.setAttribute("width", "" + newWidth);
-        updateNearestNeighbour(newX);
-        if (refB === undefined || refB.current === null) return;
-        const newWidthB = Math.min(width - newX, scaleWindowSizeB);
-        refB.current.setAttribute("x", "" + newX);
-        refB.current.setAttribute("width", "" + newWidthB);
+        setBrushPosition(xScale.invert(newX));
+        // updateNearestNeighbour(newX);
       },
-      [
-        cursorRef,
-        refB,
-        scaleWindowSize,
-        scaleWindowSizeB,
-        updateNearestNeighbour,
-      ]
+      [cursorRef, setBrushPosition, xScale]
     );
 
     const onCursorLeave = useCallback(() => {
-      const ref = cursorRef as React.RefObject<SVGRectElement>;
-      if (ref.current === null) return;
-      ref.current.setAttribute("width", "0");
-      if (refB === undefined || refB.current === null) return;
-      refB.current.setAttribute("width", "0");
-    }, [cursorRef, refB]);
+      setBrushPosition(-1);
+    }, [setBrushPosition]);
 
     return (
       <div className="bg-indigo-50 rounded-sm">
@@ -192,6 +183,8 @@ export const LinePlot = forwardRef<SVGRectElement, Props>(
                 ref={cursorRef}
                 className={brushClassName}
                 height={innerHeight}
+                x={brushXPosition}
+                width={brushWindowSize}
               />
               <rect
                 className="opacity-0"

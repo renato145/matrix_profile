@@ -53,7 +53,6 @@ export const Plot = () => {
         <div className="mt-3">
           <LinePlot
             ref={cursorRefTS}
-            refB={cursorRefMP}
             y={plotData}
             margins={margins}
             height={dataHeight}
@@ -64,7 +63,6 @@ export const Plot = () => {
             cursorBrush
             brushClassName="fill-current text-blue-400 opacity-30"
             windowSize={windowSize}
-            windowSizeB={1}
           />
         </div>
       ) : dataState === DataState.SelectColumn ? (
@@ -80,7 +78,6 @@ export const Plot = () => {
         <div className="mt-2">
           <LinePlot
             ref={cursorRefMP}
-            refB={cursorRefTS}
             y={profile}
             yLength={plotData?.length}
             margins={margins}
@@ -92,7 +89,6 @@ export const Plot = () => {
             cursorBrush
             brushClassName="fill-current text-red-600 opacity-60 stroke-current stroke-1"
             windowSize={1}
-            windowSizeB={windowSize}
           />
         </div>
       ) : null}

@@ -44,6 +44,7 @@ const emptyCsvData = {
 
 export type TStore = {
   windowSize: number;
+  /** Last window size computed */
   lastWindowSize?: number;
   data?: TData;
   nRows?: number;
@@ -63,6 +64,8 @@ export type TStore = {
   calculate: () => void;
   /** If neighbour is not found `-1` is returned */
   getNearestNeighbour: (idx: number) => number;
+  brushPosition: number;
+  setBrushPosition: (x: number) => void;
 };
 
 export const useStore = create<TStore>((set, get) => ({
@@ -126,8 +129,10 @@ export const useStore = create<TStore>((set, get) => ({
     });
   },
   getNearestNeighbour: (idx) => {
-    const pIdxs = get().profileIdxs
+    const pIdxs = get().profileIdxs;
     if (pIdxs === undefined) return -1;
     return pIdxs[idx];
   },
+  brushPosition: -1,
+  setBrushPosition: (x) => set({ brushPosition: x }),
 }));
