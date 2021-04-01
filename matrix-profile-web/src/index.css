@@ -66,3 +66,8 @@
   }
 
 }
+
+.tick line {
+  stroke-opacity: 0.35;
+  stroke-dasharray: 1;
+}

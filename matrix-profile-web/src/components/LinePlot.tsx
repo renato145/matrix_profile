@@ -1,4 +1,12 @@
-import { axisBottom, axisLeft, extent, line, scaleLinear, select } from "d3";
+import {
+  axisBottom,
+  axisLeft,
+  extent,
+  format,
+  line,
+  scaleLinear,
+  select,
+} from "d3";
 import React, { CSSProperties, useCallback, useMemo, useRef } from "react";
 import { TStore, useStore } from "../store";
 import { Margins } from "../types";
@@ -38,6 +46,8 @@ const selector = ({
   nearestNeighbourPosition,
 });
 
+const formatNumber = format(".2s");
+
 export const LinePlot: React.FC<Props> = ({
   y,
   yLength,
@@ -76,7 +86,12 @@ export const LinePlot: React.FC<Props> = ({
     const domain = extent(y).map((o?: number) => o ?? 0);
     const range = [height - margins.bottom, margins.top];
     const yScale = scaleLinear().domain(domain).range(range).nice();
-    const yAxis = axisLeft(yScale).tickSize(-innerWidth).ticks(4);
+    const yAxis = axisLeft(yScale)
+      .tickSize(-innerWidth)
+      .tickPadding(5)
+      .ticks(4)
+      .tickFormat(formatNumber);
+
     return { yScale, yAxis };
   }, [y, height, margins, innerWidth]);
 
