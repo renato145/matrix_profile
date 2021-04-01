@@ -61,6 +61,8 @@ export type TStore = {
   loadSampleData: () => void;
   uploadData: (data: string, path?: string) => void;
   calculate: () => void;
+  /** If neighbour is not found `-1` is returned */
+  getNearestNeighbour: (idx: number) => number;
 };
 
 export const useStore = create<TStore>((set, get) => ({
@@ -122,5 +124,10 @@ export const useStore = create<TStore>((set, get) => ({
       calcState: CalcState.Finished,
       lastWindowSize: windowSize,
     });
+  },
+  getNearestNeighbour: (idx) => {
+    const pIdxs = get().profileIdxs
+    if (pIdxs === undefined) return -1;
+    return pIdxs[idx];
   },
 }));

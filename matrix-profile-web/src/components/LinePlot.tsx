@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { TStore, useStore } from "../store";
 import { Margins } from "../types";
 
 interface Props {
@@ -36,6 +37,8 @@ interface Props {
   windowSizeB?: number;
   children?: ReactNode;
 }
+
+const selector = (props: TStore) => props.getNearestNeighbour;
 
 export const LinePlot = forwardRef<SVGRectElement, Props>(
   (
@@ -114,6 +117,17 @@ export const LinePlot = forwardRef<SVGRectElement, Props>(
       [windowSizeB, xScale]
     );
 
+    const getNearestNeighbour = useStore(selector);
+
+    const updateNearestNeighbour = useCallback(
+      (x: number) => {
+        const idx = Math.round(xScale.invert(x + margins.left));
+        const nearest_idx = getNearestNeighbour(idx);
+        console.log(idx, nearest_idx);
+      },
+      [getNearestNeighbour, margins.left, xScale]
+    );
+
     const onCursorMove = useCallback(
       ({ clientX, target }) => {
         const ref = cursorRef as React.RefObject<SVGRectElement>;
@@ -123,12 +137,19 @@ export const LinePlot = forwardRef<SVGRectElement, Props>(
         const newWidth = Math.min(width - newX, scaleWindowSize);
         ref.current.setAttribute("x", "" + newX);
         ref.current.setAttribute("width", "" + newWidth);
+        updateNearestNeighbour(newX);
         if (refB === undefined || refB.current === null) return;
         const newWidthB = Math.min(width - newX, scaleWindowSizeB);
         refB.current.setAttribute("x", "" + newX);
         refB.current.setAttribute("width", "" + newWidthB);
       },
-      [cursorRef, refB, scaleWindowSize, scaleWindowSizeB]
+      [
+        cursorRef,
+        refB,
+        scaleWindowSize,
+        scaleWindowSizeB,
+        updateNearestNeighbour,
+      ]
     );
 
     const onCursorLeave = useCallback(() => {
