@@ -132,7 +132,6 @@ export const useStore = create<TStore>((set, get) => ({
   getNearestNeighbour: (idx) => {
     const pIdxs = get().profileIdxs;
     if (pIdxs === undefined) return -1;
-    console.log(idx, Math.round(idx), pIdxs[Math.round(idx)]);
     return pIdxs[Math.round(idx)] ?? -1;
   },
   brushPosition: -1,
