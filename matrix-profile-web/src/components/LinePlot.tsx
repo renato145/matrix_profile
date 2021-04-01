@@ -9,28 +9,39 @@ import React, {
 import { Margins } from "../types";
 
 interface Props {
+  /** Time series data */
   y: number[];
+  /** Maximum length for the data (to align all plots) */
   yLength?: number;
   height: number;
   width: number;
   margins: Margins;
+  /** min-max index limits for the plot */
   limits: number[] | null;
   title?: string;
   className: string;
   showYAxis?: boolean;
+  /** If true, a brush is shown under the cursor on hover */
   cursorBrush?: boolean;
-  children?: ReactNode;
-  refB?: RefObject<SVGRectElement>;
-  windowSize?: number;
-  windowSizeB?: number;
+  /** Classname for the `cursorBrush` */
   brushClassName?: string;
+  /**
+   * A reference for an external brush object, to be updated in the at
+   * the same time as `cursorBrush`, beware that the local xScale is used
+   */
+  refB?: RefObject<SVGRectElement>;
+  /** Window size for `cursorBrush` */
+  windowSize?: number;
+  /** Window size for external brush referenced by `refB` */
+  windowSizeB?: number;
+  children?: ReactNode;
 }
 
 export const LinePlot = forwardRef<SVGRectElement, Props>(
   (
     {
       y,
-      yLength: yOffset,
+      yLength,
       margins,
       height,
       width,
@@ -52,9 +63,9 @@ export const LinePlot = forwardRef<SVGRectElement, Props>(
 
     const { x, yShow } = useMemo(() => {
       return limits === null
-        ? { x: [0, yOffset ?? y.length ], yShow: y }
+        ? { x: [0, yLength ?? y.length], yShow: y }
         : { x: [limits[0], limits[1]], yShow: y.slice(limits[0], limits[1]) };
-    }, [limits, y, yOffset]);
+    }, [limits, y, yLength]);
 
     const { xAxis, xScale } = useMemo(() => {
       const domain = x;
