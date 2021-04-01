@@ -84,8 +84,10 @@ export const Brush: React.FC<Props> = ({
         className="stroke-current text-blue-900 stroke-2 text-opacity-80"
         showYAxis={false}
         windowSize={windowSize}
-            brushNearestClassName="fill-current text-blue-600 opacity-80 stroke-current stroke-2 stroke-dashed-8"
-            brushNearestStyle={{fillOpacity: 0.1}}
+        cursorBrush
+        brushClassName="fill-current text-blue-400 opacity-40"
+        brushNearestClassName="fill-current text-blue-600 opacity-80 stroke-current stroke-2 stroke-dashed-8"
+        brushNearestStyle={{ fillOpacity: 0.1 }}
       >
         {pathMP !== null ? (
           <path
