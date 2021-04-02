@@ -2,12 +2,12 @@ import { extent, line, scaleLinear } from "d3";
 import { brushX } from "d3-brush";
 import { select } from "d3-selection";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { TStore, useStore } from "../store";
 import { Margins } from "../types";
 import { LinePlot } from "./LinePlot";
 
 interface Props {
   y: number[];
-  profile?: number[];
   width: number;
   height: number;
   margins: Margins;
@@ -15,15 +15,21 @@ interface Props {
   setLimits: (x: number[] | null) => void;
 }
 
+const selector = ({ profile, discords, motifs }: TStore) => ({
+  profile,
+  discords,
+  motifs,
+});
+
 export const Brush: React.FC<Props> = ({
   y,
-  profile,
   height,
   width,
   margins,
   windowSize,
   setLimits,
 }) => {
+  const { discords, motifs, profile } = useStore(selector);
   const xScale = useMemo(() => {
     const domain = [0, y.length];
     const range = [margins.left, width - margins.right];
@@ -68,6 +74,11 @@ export const Brush: React.FC<Props> = ({
     return null;
   }, [profile, xScale, yScaleMP]);
 
+  const discordPoints = useMemo(() => {
+    const points = discords.map(([x, y]) => [xScale(x), yScaleMP(y)]);
+    return points;
+  }, [discords, xScale, yScaleMP]);
+
   useEffect(() => {
     if (brush === undefined || ref.current === null) return;
     select(ref.current).call(brush);
@@ -97,6 +108,11 @@ export const Brush: React.FC<Props> = ({
           />
         ) : null}
         <g ref={ref} />
+        <g>
+          {discordPoints.map(([x, y], i) => (
+            <circle className="discord-points" key={i} cx={x} cy={y} />
+          ))}
+        </g>
       </LinePlot>
     </div>
   );

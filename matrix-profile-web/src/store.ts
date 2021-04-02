@@ -76,7 +76,7 @@ export type TStore = {
    */
   discordThreshold: number;
   /** Indexes of calculated discords */
-  discords: number[];
+  discords: number[][];
   calculateDiscords: () => void;
   /**
    * Quantile threshold for motifs (common patterns)
@@ -85,7 +85,7 @@ export type TStore = {
    */
   motifThreshold: number;
   /** Indexes of calculated motifs */
-  motifs: number[];
+  motifs: number[][];
   calculateMotifs: () => void;
 };
 
@@ -179,7 +179,7 @@ export const useStore = create<TStore>((set, get) => ({
           : profile
               .map((x, i) => [x, i])
               .filter(([x]) => x >= th)
-              .map(([x, i]) => i);
+              .map(([x, i]) => [i, x]);
       return { discords };
     });
   },
@@ -195,7 +195,7 @@ export const useStore = create<TStore>((set, get) => ({
           : profile
               .map((x, i) => [x, i])
               .filter(([x]) => x <= th)
-              .map(([x, i]) => i);
+              .map(([x, i]) => [i, x]);
       return { motifs };
     });
   },

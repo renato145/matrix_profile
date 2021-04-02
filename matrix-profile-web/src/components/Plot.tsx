@@ -117,7 +117,6 @@ export const Plot = () => {
         <div className="mt-2">
           <Brush
             y={plotData}
-            profile={profile}
             margins={brushMargins}
             height={brushHeight}
             width={width}

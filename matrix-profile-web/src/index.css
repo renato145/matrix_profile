@@ -71,3 +71,16 @@
   stroke-opacity: 0.35;
   stroke-dasharray: 1;
 }
+
+.discord-points {
+  fill: red;
+  stroke: black; 
+  stroke-width: 1;
+  r: 10;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in-out;
+}
+
+.discord-points:hover {
+  r: 15;
+}
