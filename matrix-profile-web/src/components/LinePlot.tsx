@@ -40,10 +40,15 @@ const selector = ({
   brushPosition,
   setBrushPosition,
   nearestNeighbourPosition,
+  brushFreeze,
+  toogleBrushFreeze,
 }: TStore) => ({
   brushPosition,
   setBrushPosition,
   nearestNeighbourPosition,
+
+  brushFreeze,
+  toogleBrushFreeze,
 });
 
 const formatNumber = format(".2s");
@@ -127,6 +132,8 @@ export const LinePlot: React.FC<Props> = ({
     brushPosition,
     setBrushPosition,
     nearestNeighbourPosition,
+    brushFreeze,
+    toogleBrushFreeze,
   } = useStore(selector);
 
   const { brushXPosition, brushWindowSize } = useMemo(() => {
@@ -161,13 +168,14 @@ export const LinePlot: React.FC<Props> = ({
 
   const onCursorMove = useCallback(
     ({ clientX, target }) => {
+      if (brushFreeze) return;
       const ref = cursorRef as React.RefObject<SVGRectElement>;
       if (ref.current === null) return;
       const { x } = target.getBoundingClientRect();
       const newX = clientX - Math.round(x);
       setBrushPosition(xScale.invert(newX + margins.left - 1));
     },
-    [margins.left, setBrushPosition, xScale]
+    [brushFreeze, margins.left, setBrushPosition, xScale]
   );
 
   return (
@@ -217,6 +225,7 @@ export const LinePlot: React.FC<Props> = ({
                 width={innerWidth}
                 height={innerHeight}
                 onPointerMove={onCursorMove}
+                onClick={toogleBrushFreeze}
               />
             </>
           ) : null}

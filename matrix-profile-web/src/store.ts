@@ -35,6 +35,7 @@ const emptyCalc = {
   profileIdxs: undefined,
   discord: undefined,
   motif: undefined,
+  brushesBkup: undefined,
 };
 
 const emptyCsvData = {
@@ -73,6 +74,8 @@ export type TStore = {
   brushesBkup?: number[];
   hideBrushes: () => void;
   showBrushes: () => void;
+  brushFreeze: boolean;
+  toogleBrushFreeze: () => void;
   /** Index of calculated the main discord (possible annomaly) */
   discord?: number[];
   calculateDiscord: () => void;
@@ -178,6 +181,10 @@ export const useStore = create<TStore>((set, get) => ({
         nearestNeighbourPosition: brushesBkup[1] ?? -1,
       };
     });
+  },
+  brushFreeze: false,
+  toogleBrushFreeze: () => {
+    set(({ brushFreeze }) => ({ brushFreeze: !brushFreeze }));
   },
   calculateDiscord: () => {
     set(({ profile }) => {
