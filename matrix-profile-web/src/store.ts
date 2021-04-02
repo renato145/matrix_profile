@@ -1,4 +1,4 @@
-import { csv, csvParse, DSVRowArray, quantile } from "d3";
+import { csv, csvParse, DSVRowArray, maxIndex, minIndex } from "d3";
 import create from "zustand";
 import { wrap } from "comlink";
 // eslint-disable-next-line import/no-webpack-loader-syntax
@@ -33,8 +33,8 @@ const emptyCalc = {
   calcState: CalcState.Empty,
   profile: undefined,
   profileIdxs: undefined,
-  discords: [],
-  motifs: [],
+  discord: undefined,
+  motif: undefined,
 };
 
 const emptyCsvData = {
@@ -65,28 +65,22 @@ export type TStore = {
   uploadData: (data: string, path?: string) => void;
   calculate: () => void;
   brushPosition: number;
-  nearestNeighbourPosition: number;
   setBrushPosition: (x: number) => void;
+  nearestNeighbourPosition: number;
   /** If neighbour is not found `-1` is returned */
   getNearestNeighbour: (idx: number) => number;
-  /**
-   * Quantile threshold for discords (anomalies)
-   * calculated using matrix profile values, higher
-   * values indicate possible discords.
-   */
-  discordThreshold: number;
-  /** Indexes of calculated discords */
-  discords: number[][];
-  calculateDiscords: () => void;
-  /**
-   * Quantile threshold for motifs (common patterns)
-   * calculated using matrix profile values, smaller
-   * values indicate possible common patterns.
-   */
-  motifThreshold: number;
-  /** Indexes of calculated motifs */
-  motifs: number[][];
-  calculateMotifs: () => void;
+  /** Stores `brushPosition` and `nearestNeighbourPosition` */
+  brushesBkup?: number[];
+  hideBrushes: () => void;
+  showBrushes: () => void;
+  /** Index of calculated the main discord (possible annomaly) */
+  discord?: number[];
+  calculateDiscord: () => void;
+  highlightDiscord: () => void;
+  /** Index of calculated the main motif (common patterns) */
+  motif?: number[];
+  calculateMotif: () => void;
+  highlightMotif: () => void;
 };
 
 export const useStore = create<TStore>((set, get) => ({
@@ -148,8 +142,8 @@ export const useStore = create<TStore>((set, get) => ({
       calcState: CalcState.Finished,
       lastWindowSize: windowSize,
     });
-    get().calculateDiscords();
-    get().calculateMotifs();
+    get().calculateDiscord();
+    get().calculateMotif();
   },
   getNearestNeighbour: (idx) => {
     const pIdxs = get().profileIdxs;
@@ -167,36 +161,50 @@ export const useStore = create<TStore>((set, get) => ({
       };
     });
   },
-  discordThreshold: 0.99,
-  discords: [],
-  calculateDiscords: () => {
-    set(({ profile, discordThreshold }) => {
-      if (profile === undefined) return { discords: [] };
-      const th = quantile(profile, discordThreshold);
-      const discords =
-        th === undefined
-          ? []
-          : profile
-              .map((x, i) => [x, i])
-              .filter(([x]) => x >= th)
-              .map(([x, i]) => [i, x]);
-      return { discords };
+  hideBrushes: () => {
+    set(({ brushPosition, nearestNeighbourPosition }) => ({
+      brushesBkup: [brushPosition, nearestNeighbourPosition],
+      brushPosition: -1,
+      nearestNeighbourPosition: -1,
+    }));
+  },
+  showBrushes: () => {
+    set(({ brushesBkup }) => {
+      if (brushesBkup === undefined)
+        return { brushPosition: -1, nearestNeighbourPosition: -1 };
+      return {
+        brushesBkup: undefined,
+        brushPosition: brushesBkup[0] ?? -1,
+        nearestNeighbourPosition: brushesBkup[1] ?? -1,
+      };
     });
   },
-  motifThreshold: 0.01,
-  motifs: [],
-  calculateMotifs: () => {
-    set(({ profile, motifThreshold }) => {
-      if (profile === undefined) return { motifs: [] };
-      const th = quantile(profile, motifThreshold);
-      const motifs =
-        th === undefined
-          ? []
-          : profile
-              .map((x, i) => [x, i])
-              .filter(([x]) => x <= th)
-              .map(([x, i]) => [i, x]);
-      return { motifs };
+  calculateDiscord: () => {
+    set(({ profile }) => {
+      if (profile === undefined) return {};
+      const idx = maxIndex(profile);
+      if (idx === -1) return {};
+      const discord = [idx, profile[idx]];
+      return { discord };
     });
+  },
+  highlightDiscord: () => {
+    const discord = get().discord;
+    if (discord === undefined) return;
+    get().setBrushPosition(discord[0]);
+  },
+  calculateMotif: () => {
+    set(({ profile }) => {
+      if (profile === undefined) return {};
+      const idx = minIndex(profile);
+      if (idx === -1) return {};
+      const motif = [idx, profile[idx]];
+      return { motif };
+    });
+  },
+  highlightMotif: () => {
+    const motif = get().motif;
+    if (motif === undefined) return;
+    get().setBrushPosition(motif[0]);
   },
 }));

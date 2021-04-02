@@ -72,15 +72,15 @@
   stroke-dasharray: 1;
 }
 
-.discord-points {
-  fill: red;
-  stroke: black; 
-  stroke-width: 1;
-  r: 10;
+.motif-discord-points {
+  fill: #ffda00;
+  stroke: #991b1b; 
+  stroke-width: 2px;
+  r: 4;
   transition-duration: 150ms;
   transition-timing-function: ease-in-out;
 }
 
-.discord-points:hover {
-  r: 15;
+.motif-discord-points:hover {
+  r: 8;
 }
