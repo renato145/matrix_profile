@@ -73,14 +73,17 @@
 }
 
 .motif-discord-points {
-  fill: #ffda00;
+  fill: rgb(255, 237, 134);
+  fill-opacity: 0.85;
   stroke: #991b1b; 
   stroke-width: 2px;
-  r: 4;
+  /* r: 4; */
+  transition-property: fill, fill-opacity;
   transition-duration: 150ms;
   transition-timing-function: ease-in-out;
 }
 
 .motif-discord-points:hover {
-  r: 8;
+  /* r: 8; */
+  fill-opacity: 0.5;
 }

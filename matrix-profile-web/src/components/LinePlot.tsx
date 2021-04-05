@@ -10,6 +10,7 @@ import {
 import React, { CSSProperties, useCallback, useMemo, useRef } from "react";
 import { TStore, useStore } from "../store";
 import { Margins } from "../types";
+import { MotifDiscordPoints } from "./MotifDiscordPoints";
 
 interface Props {
   /** Time series data */
@@ -34,6 +35,7 @@ interface Props {
   brushNearestStyle?: CSSProperties;
   /** Window size for `cursorBrush` */
   windowSize?: number;
+  showMotifDiscordPoints?: boolean;
 }
 
 const selector = ({
@@ -68,6 +70,7 @@ export const LinePlot: React.FC<Props> = ({
   brushNearestClassName,
   showYAxis = true,
   cursorBrush = false,
+  showMotifDiscordPoints = false,
   children,
 }) => {
   const innerHeight = height - margins.top - margins.bottom;
@@ -231,6 +234,9 @@ export const LinePlot: React.FC<Props> = ({
           ) : null}
         </g>
         {children}
+        {showMotifDiscordPoints ? (
+          <MotifDiscordPoints xScale={xScale} yScale={yScale} size={5} hoverSize={10} />
+        ) : null}
       </svg>
     </div>
   );

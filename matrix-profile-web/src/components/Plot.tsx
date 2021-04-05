@@ -110,6 +110,7 @@ export const Plot = () => {
             brushClassName="fill-current text-red-600 opacity-60 stroke-current stroke-2"
             brushNearestClassName="fill-none text-red-600 opacity-40 stroke-current stroke-2 stroke-dashed-8"
             windowSize={1}
+            showMotifDiscordPoints
           />
         </div>
       ) : null}
