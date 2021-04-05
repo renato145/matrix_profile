@@ -19,12 +19,6 @@ pub struct NaiveMatrixProfile {
 }
 
 impl MatrixProfile for NaiveMatrixProfile {
-    /// Computes the matrix profile using a naive (brute force) algorithm.
-    ///
-    /// # Arguments
-    ///
-    /// * `x` - Time series data
-    /// * `m` - Window size
     fn calculate(x: Vec<f32>, m: usize) -> Self {
         let x = Array1::from(x);
         let n = x.len() - m + 1;
