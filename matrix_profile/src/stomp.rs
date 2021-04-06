@@ -3,6 +3,7 @@
 //! [here]: https://www.cs.ucr.edu/~eamonn/MatrixProfile.html
 use crate::matrix_profile::MatrixProfile;
 use ndarray::{concatenate, prelude::*};
+use rustfft::{num_complex::Complex32, FftPlanner};
 
 pub struct StompMatrixProfile {
     /// Matrix profile.
@@ -32,14 +33,90 @@ fn precompute_stats(x: &Array1<f32>, m: usize) -> (Array1<f32>, Array1<f32>) {
     (mean_t, sigma_t)
 }
 
+fn sliding_dot_product(x: &Array1<f32>, m: usize) -> Vec<f32> {
+    let q = x.slice(s![..m]).to_owned();
+    let n = x.len();
+    let m = q.len();
+
+    // Append x with n zeros
+    let ta = concatenate![Axis(0), x.to_owned(), Array1::zeros(n)];
+
+    // Reverse Q
+    let qr = q.slice(s![..;-1]);
+
+    // Append qra
+    let qra = concatenate![Axis(0), qr, Array1::zeros(2 * n - m)];
+
+    // Compute FFTs
+    let mut planner = FftPlanner::<f32>::new();
+    let fft = planner.plan_fft_forward(2 * n);
+
+    let mut qraf = qra
+        .into_raw_vec()
+        .into_iter()
+        .map(|o| Complex32::new(o, 0f32))
+        .collect::<Vec<_>>();
+    fft.process(&mut qraf);
+
+    let mut taf = ta
+        .into_raw_vec()
+        .into_iter()
+        .map(|o| Complex32::new(o, 0f32))
+        .collect::<Vec<_>>();
+    fft.process(&mut taf);
+
+    // Compute the inverse FFT to the element-wise multiplication of qraf and taf
+    let ifft = planner.plan_fft_inverse(2 * n);
+    let mut qt = qraf
+        .into_iter()
+        .zip(taf.into_iter())
+        .map(|(a, b)| a * b)
+        .collect::<Vec<_>>();
+    ifft.process(&mut qt);
+
+    let div = qt.len() as f32;
+    let qt = qt
+        .into_iter()
+        .skip(m - 1)
+        .take(n - m + 1)
+        .map(|o| o.re / div)
+        .collect::<Vec<_>>();
+    qt
+}
+
 impl MatrixProfile for StompMatrixProfile {
     fn calculate(x: Vec<f32>, m: usize) -> Self {
         let x = Array1::from(x);
         let n = x.len() - m + 1;
         // Nearby subsequences are likely highly similar so we define an "exclusion zone" around the diagonal
-        let exclusion_zone = (m as f32 / 4f32).ceil() as usize;
+        // let exclusion_zone = (m as f32 / 4f32).ceil() as usize;
 
         let (meanT, sigmaT) = precompute_stats(&x, m);
+
+        let profile: Vec<f32> = Vec::with_capacity(n);
+        let profile_idxs: Vec<usize> = Vec::with_capacity(n);
+
+        let qt = sliding_dot_product(&x, m);
+
+        for idx in 0..(n - 1) {
+            let q_std = sigmaT[idx].max(f32::EPSILON);
+            if idx == 0 {
+                // let a =x.slice(s![..m]);
+                // let qt = sliding_dot_product(x.slice(s![..m]), x);
+                // let QT = sliding_dot_product_stomp(T[0:m], T).real
+            }
+
+            // # There's somthing with normalization
+            // Q_std = sigmaT[idx] if sigmaT[idx] > epsilon else epsilon
+            // if idx == 0:
+            //     QT = sliding_dot_product_stomp(T[0:m], T).real
+            //     QT_first = np.copy(QT)
+            // else:
+            //     QT[1:] = QT[0:-1]- (T[0:seq_l] * T[idx - 1]) + (T[m:n] * T[idx + m - 1])
+            //     QT[0] = QT_first[idx]
+        }
+
+        // let profile = Array1::from_elem(n, f32::INFINITY);
 
         // let (profile, profile_idxs) = (0..n)
         //     .map(|i| {
@@ -127,6 +204,33 @@ mod tests {
         ];
         assert_relative_eq!(means.as_slice(), expected_means.as_slice(), epsilon = 1e-4);
         assert_relative_eq!(stds.as_slice(), expected_stds.as_slice(), epsilon = 1e-4);
+    }
+
+    #[test]
+    fn test_sliding_dot_product() {
+        let x = random_data(20, 34);
+        let x = Array1::from(x);
+        let res = sliding_dot_product(&x, 4);
+        let expected: Vec<f32> = vec![
+            12273.65375704,
+            7976.24013643,
+            3290.74242092,
+            2140.32768543,
+            5206.64245513,
+            10809.0319089,
+            13920.31427121,
+            17299.30222674,
+            15872.43813917,
+            11194.80940846,
+            6410.00704706,
+            1168.0809309,
+            2185.85540503,
+            3730.44702013,
+            4588.54192503,
+            5061.97403949,
+            6093.545234,
+        ];
+        assert_relative_eq!(res.as_slice(), expected.as_slice(), epsilon = 1e-2);
     }
 
     #[test]
