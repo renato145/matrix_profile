@@ -93,15 +93,15 @@ export const useStore = create<TStore>((set, get) => ({
   setData: (data) => set({ data }),
   setWindowSize: (windowSize) => set({ windowSize }),
   selectColumn: (column) => {
-    set(({ csvData }) => {
-      if (csvData === undefined) return { dataState: DataState.Error };
-      const data = csvData.map((row) => ({ value: +(row[column] ?? "") }));
-      return {
-        data,
-        nRows: data.length,
-        selectedColumn: column,
-        dataState: DataState.CustomData,
-      };
+    const csvData = get().csvData;
+    if (csvData === undefined) return { dataState: DataState.Error };
+    const data = csvData.map((row) => ({ value: +(row[column] ?? "") }));
+    set({
+      data,
+      nRows: data.length,
+      selectedColumn: column,
+      dataState: DataState.CustomData,
+      ...emptyCalc,
     });
   },
   loadSampleData: async () => {

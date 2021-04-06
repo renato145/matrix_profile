@@ -18,7 +18,7 @@ const exports: TWorker = {
   async calculate(x, m) {
     await this.loadModule();
     if (this.module === null) throw new Error("Failed to load wasm module");
-    const res = await this.module.NaiveMatrixProfile.calculate(x, m);
+    const res = await this.module.StompMatrixProfile.calculate(x, m);
     const profile = Array.from(res.get_profile());
     const profileIdxs = Array.from(res.get_profile_idxs());
     return { profile, profileIdxs };

@@ -4,7 +4,7 @@ export const RepoDescription: React.FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => (
   <div {...props}>
-    <div className="text-justify leading-snug font-light text-base sm:text-lg">
+    <div className="text-justify leading-snug font-normal text-base sm:text-lg">
       <p>
         A{" "}
         <a
@@ -17,10 +17,8 @@ export const RepoDescription: React.FC<HTMLProps<HTMLDivElement>> = ({
         is a vector that contains the z-normalized euclidean distances between a
         window of the time series and its nearest pair. This allow us to
         identify potential anomalies (discords) and common patterns (motif) in
-        the data.
-      </p>
-      <p className="mt-2">
-        To perform the matrix profile calculation I used{" "}
+        the data. To calculate the matrix profile I implemented the STOMP
+        algorithm using{" "}
         <a href="https://www.rust-lang.org/" target="_black" rel="noopener">
           Rust
         </a>{" "}
@@ -35,18 +33,16 @@ export const RepoDescription: React.FC<HTMLProps<HTMLDivElement>> = ({
           rel="noopener"
         >
           repository
-        </a>{" "}
-        (atm I use a naive implementation, but plan to implement the STOMP
-        algorithm later). Also, if you would like to use matrix profile in
-        python I recommend the{" "}
+        </a>
+        . Also, if you would like to use matrix profile in python check{" "}
         <a
           href="https://github.com/TDAmeritrade/stumpy"
           target="_black"
           rel="noopener"
         >
           stumpy
-        </a>{" "}
-        library.
+        </a>
+        .
       </p>
     </div>
   </div>
