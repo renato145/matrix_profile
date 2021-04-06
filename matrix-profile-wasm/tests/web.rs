@@ -2,14 +2,21 @@
 
 #![cfg(target_arch = "wasm32")]
 
-use matrix_profile_wasm::NaiveMatrixProfile;
+use matrix_profile_wasm::{NaiveMatrixProfile, StompMatrixProfile};
 use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-fn pass() {
+fn test_naive() {
     let x: Vec<f32> = vec![1.0, 2.0, 3.0, 4.0, 1.0, 4.0, 5.0, 12.0, 4.0, 5.0];
     let res = NaiveMatrixProfile::calculate(x, 4);
+    let _profile = res.get_profile();
+}
+
+#[wasm_bindgen_test]
+fn test_stomp() {
+    let x: Vec<f32> = vec![1.0, 2.0, 3.0, 4.0, 1.0, 4.0, 5.0, 12.0, 4.0, 5.0];
+    let res = StompMatrixProfile::calculate(x, 4);
     let _profile = res.get_profile();
 }
