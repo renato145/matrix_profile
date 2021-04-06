@@ -80,7 +80,7 @@ impl NaiveMatrixProfile {
                 (0..n)
                     .map(|j| {
                         if (exclusion_start <= j) && (j <= exclusion_end) {
-                            return std::f32::INFINITY;
+                            return f32::INFINITY;
                         }
 
                         let b = normalize(x.slice(s![j..(j + m)]).to_owned());

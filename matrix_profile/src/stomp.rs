@@ -89,57 +89,66 @@ impl MatrixProfile for StompMatrixProfile {
         let x = Array1::from(x);
         let n = x.len() - m + 1;
         // Nearby subsequences are likely highly similar so we define an "exclusion zone" around the diagonal
-        // let exclusion_zone = (m as f32 / 4f32).ceil() as usize;
+        let exclusion_zone = (m as f32 / 4f32).ceil() as usize;
 
-        let (meanT, sigmaT) = precompute_stats(&x, m);
+        let (mean_t, sigma_t) = precompute_stats(&x, m);
+        let mut profile: Vec<f32> = vec![f32::INFINITY; n];
+        let mut profile_idxs: Vec<usize> = vec![0; n];
 
-        let profile: Vec<f32> = Vec::with_capacity(n);
-        let profile_idxs: Vec<usize> = Vec::with_capacity(n);
+        let mut qt = sliding_dot_product(&x, m);
+        let qt_first = qt.clone();
+        let qt_len = qt.len();
 
-        let qt = sliding_dot_product(&x, m);
-
-        for idx in 0..(n - 1) {
-            let q_std = sigmaT[idx].max(f32::EPSILON);
-            if idx == 0 {
-                // let a =x.slice(s![..m]);
-                // let qt = sliding_dot_product(x.slice(s![..m]), x);
-                // let QT = sliding_dot_product_stomp(T[0:m], T).real
+        for idx in 0..n {
+            let q_std = sigma_t[idx].max(f32::EPSILON);
+            if idx > 0 {
+                let qt_ = qt.clone().into_iter().take(qt_len);
+                qt.iter_mut()
+                    .skip(1)
+                    .zip(qt_)
+                    .enumerate()
+                    .for_each(|(i, (a, b))| {
+                        *a = b - (x[i] * x[idx - 1]) + (x[i + m] * x[idx + m - 1])
+                    });
+                qt[0] = qt_first[idx];
             }
 
-            // # There's somthing with normalization
-            // Q_std = sigmaT[idx] if sigmaT[idx] > epsilon else epsilon
-            // if idx == 0:
-            //     QT = sliding_dot_product_stomp(T[0:m], T).real
-            //     QT_first = np.copy(QT)
-            // else:
-            //     QT[1:] = QT[0:-1]- (T[0:seq_l] * T[idx - 1]) + (T[m:n] * T[idx + m - 1])
-            //     QT[0] = QT_first[idx]
+            // Calculate distance profile
+            let mut distances = qt
+                .iter()
+                .zip(mean_t.iter())
+                .zip(sigma_t.iter())
+                .map(|((t, mt), st)| {
+                    2.0 * ((m as f32) - (t - (m as f32) * mt * mean_t[idx]) / (q_std * st))
+                })
+                .map(|o| if o < f32::EPSILON { 0f32 } else { o })
+                .collect::<Vec<_>>();
+
+            // Apply "exclusion zone"
+            let min_idx = idx.checked_sub(exclusion_zone).unwrap_or(0);
+            let max_idx = (idx + exclusion_zone).min(distances.len());
+            for (i, o) in distances.iter_mut().enumerate() {
+                if (i >= min_idx) && (i <= max_idx) {
+                    *o = f32::INFINITY;
+                }
+            }
+
+            // Update profile
+            for (i, (profile_d, d)) in profile.iter_mut().zip(distances).enumerate() {
+                if *profile_d > d {
+                    profile_idxs[i] = idx;
+                    *profile_d = d;
+                }
+            }
         }
 
-        // let profile = Array1::from_elem(n, f32::INFINITY);
+        profile.iter_mut().for_each(|o| *o = o.sqrt());
 
-        // let (profile, profile_idxs) = (0..n)
-        //     .map(|i| {
-        //         let a = normalize(x.slice(s![i..(i + m)]).to_owned());
-        //         let exclusion_start = i - exclusion_zone.min(i);
-        //         let exclusion_end = (i + exclusion_zone).min(n);
-        //         (0..n)
-        //             .filter(|&j| (j < exclusion_start) || (exclusion_end < j))
-        //             .map(|j| {
-        //                 let b = normalize(x.slice(s![j..(j + m)]).to_owned());
-        //                 let distance = euclidean_distance(&a, &b);
-        //                 (distance, j)
-        //             })
-        //             .min_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(Ordering::Less))
-        //             .unwrap()
-        //     }) //     .unzip();
-
-        // Self {
-        //     profile,
-        //     profile_idxs,
-        //     m,
-        // }
-        todo!()
+        StompMatrixProfile {
+            profile,
+            profile_idxs,
+            m,
+        }
     }
 
     fn get_profile(&self) -> &Vec<f32> {
@@ -249,7 +258,47 @@ mod tests {
         ];
         let expected_idxs: Vec<usize> =
             vec![8, 9, 14, 5, 11, 3, 12, 9, 0, 7, 1, 14, 15, 16, 11, 12, 13];
-        assert_relative_eq!(profile.as_slice(), expected_profile.as_slice());
+
+        for (i, (a, b)) in profile.iter().zip(expected_profile.iter()).enumerate() {
+            if (a - b) > 1e-3 {
+                println!("- {}: {} != {}", i, a, b);
+            }
+        }
+
+        assert_relative_eq!(
+            profile.as_slice(),
+            expected_profile.as_slice(),
+            epsilon = 1e-3
+        );
         assert_eq!(idxs.as_slice(), expected_idxs.as_slice());
+    }
+
+    #[test]
+    fn test_stomp_large() {
+        let x = random_data(100, 34);
+        println!("x: {:?}", x);
+        let res = StompMatrixProfile::calculate(x.clone(), 10);
+        let expected = crate::naive::NaiveMatrixProfile::calculate(x, 10);
+
+        for (i, (a, b)) in res
+            .get_profile()
+            .iter()
+            .zip(expected.get_profile().iter())
+            .enumerate()
+        {
+            if (a - b) > 1e-3 {
+                println!("- {}: {} != {}", i, a, b);
+            }
+        }
+
+        assert_relative_eq!(
+            res.get_profile().as_slice(),
+            expected.get_profile().as_slice(),
+            epsilon = 1e-3
+        );
+        assert_eq!(
+            res.get_profile_idxs().as_slice(),
+            expected.get_profile_idxs().as_slice(),
+        );
     }
 }
