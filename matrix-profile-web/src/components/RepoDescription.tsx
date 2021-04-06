@@ -4,7 +4,7 @@ export const RepoDescription: React.FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => (
   <div {...props}>
-    <div className="text-justify leading-snug font-normal text-base sm:text-lg">
+    <div className="text-justify text-gray-500 leading-snug font-normal text-base sm:text-lg">
       <p>
         A{" "}
         <a
