@@ -15,7 +15,7 @@
     "@types/react": "^17.0.3",
     "@types/react-dom": "^17.0.3",
     "comlink": "^4.3.0",
-    "d3": "^6.6.1",
+    "d3": "^6.6.2",
     "matrix-profile-wasm": "file:../matrix-profile-wasm/pkg",
     "react": "^17.0.2",
     "react-csv": "^2.0.3",
@@ -57,13 +57,13 @@
     ]
   },
   "devDependencies": {
-    "@tailwindcss/postcss7-compat": "^2.0.4",
+    "@tailwindcss/postcss7-compat": "^2.1.0",
     "@types/d3": "^6.3.0",
     "@types/react-csv": "^1.1.1",
     "autoprefixer": "^9.8.6",
     "gh-pages": "^3.1.0",
     "postcss": "^7.0.35",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.4",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.0",
     "worker-loader": "^3.0.8"
   }
 }
