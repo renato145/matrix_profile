@@ -12,7 +12,7 @@ pub mod naive;
 pub mod stomp;
 pub mod utils;
 
-pub use matrix_profile::MatrixProfile;
+pub use crate::matrix_profile::MatrixProfile;
 pub use naive::NaiveMatrixProfile;
 pub use stomp::StompMatrixProfile;
 
