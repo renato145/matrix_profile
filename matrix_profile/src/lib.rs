@@ -6,6 +6,7 @@
 //!
 //! [talk]: https://www.youtube.com/watch?v=cCJy6hzAJQQ
 //! [here]: https://www.cs.ucr.edu/~eamonn/MatrixProfile.html
+#![allow(clippy::many_single_char_names)]
 
 pub mod matrix_profile;
 pub mod naive;

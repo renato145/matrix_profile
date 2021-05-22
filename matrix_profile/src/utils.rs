@@ -14,8 +14,7 @@ where
 
 /// Calculates euclidean distance between 2 arrays.
 pub fn euclidean_distance<T: Float>(a: &Array1<T>, b: &Array1<T>) -> T {
-    let distance = (a - b).mapv(|o| o.powi(2)).sum().sqrt();
-    distance
+    (a - b).mapv(|o| o.powi(2)).sum().sqrt()
 }
 
 pub trait ArgminSkipZero<A, S>

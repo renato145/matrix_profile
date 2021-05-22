@@ -28,7 +28,7 @@ fn precompute_stats(x: &Array1<f32>, m: usize) -> (Array1<f32>, Array1<f32>) {
     let mean_t = sum_t / (m as f32);
     let mean_t2 = sum_t2 / (m as f32);
     let mean_tp2 = mean_t.map(|o| o.powi(2));
-    let sigma_t2 = mean_t2.clone() - mean_tp2;
+    let sigma_t2 = mean_t2 - mean_tp2;
     let sigma_t = sigma_t2.mapv(f32::sqrt);
     (mean_t, sigma_t)
 }
@@ -75,13 +75,11 @@ fn sliding_dot_product(x: &Array1<f32>, m: usize) -> Vec<f32> {
     ifft.process(&mut qt);
 
     let div = qt.len() as f32;
-    let qt = qt
-        .into_iter()
+    qt.into_iter()
         .skip(m - 1)
         .take(n - m + 1)
         .map(|o| o.re / div)
-        .collect::<Vec<_>>();
-    qt
+        .collect::<Vec<_>>()
 }
 
 impl MatrixProfile for StompMatrixProfile {
@@ -125,7 +123,7 @@ impl MatrixProfile for StompMatrixProfile {
                 .collect::<Vec<_>>();
 
             // Apply "exclusion zone"
-            let min_idx = idx.checked_sub(exclusion_zone).unwrap_or(0);
+            let min_idx = idx.saturating_sub(exclusion_zone);
             let max_idx = (idx + exclusion_zone).min(distances.len());
             for (i, o) in distances.iter_mut().enumerate() {
                 if (i >= min_idx) && (i <= max_idx) {
